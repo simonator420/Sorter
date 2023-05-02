@@ -451,6 +451,18 @@ class ListView(c4d.gui.TreeViewFunctions):
         for tex in reversed(self.listOfTexture):
             if tex.IsSelected:
                 self.listOfTexture.remove(tex)
+    
+    def GetDropDownMenu(self, root, userdata, obj, lColumn, menuInfo):
+        maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+        i = 1
+        for map in maps:
+            menuInfo["menu"][1000] = map
+        menuInfo["entry"] = 1001 # Select teh second entry
+        
+        menuInfo["state"] = int(menuInfo["state"])  # Workaround to not have warning in Cinema 4D. Will be fixed in the next C4D version.
+
+    def SetDropDownMenu(self, root, userdata, obj, lColumn, entry):
+        print(f"User selected the entry with the ID: {entry}")
 
 
 
@@ -1021,7 +1033,7 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 570, 950)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 570, 750)
         return True
         
     def CoreMessage(self, id, msg):
