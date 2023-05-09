@@ -63,10 +63,18 @@ class ID():
     DIALOG_ERROR = 100008
     DIALOG_MAP_16B_NORMAL_CB = 100009
 
-    DIALOG_GROUP_DROPBOXES = 100020
+    DIALOG_GROUP_DROPBOXES = 1000200
     DIALOG_DROPBOX_BUTTON1= 100021
     DIALOG_DROPBOX_BUTTON2 = 100022
     DIALOG_DROPBOX_MAIN = 100023
+
+    DIALOG_GROUP2_DOPBOXES = 100024
+    DIALOG_TEXT2_DROPBOX = 100029
+    DIALOG_DROPBOX_MAIN2 = 100025
+
+    DIALOG_GROUP3_DOPBOXES = 100027
+    DIALOG_TEXT_DROPBOX = 100028
+    DIALOG_DROPBOX_MAIN3 = 100026
 
     # Todo: generate this with swig
     PLUGINID_CORONA4D_MATERIAL = 1032100
@@ -515,11 +523,30 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         pathBox = self.AddEditText(ID.DIALOG_FOLDER_LIST,  c4d.BFH_SCALEFIT, inith=10, initw=50)
 
-        self.GroupBegin(ID.DIALOG_GROUP_DROPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
-        self.AddButton(ID.DIALOG_DROPBOX_BUTTON1,c4d.BFH_SCALEFIT, 1, 1, "<")
-        self.AddComboBox(ID.DIALOG_DROPBOX_MAIN,c4d.BFH_SCALEFIT)
-        self.AddButton(ID.DIALOG_DROPBOX_BUTTON2,c4d.BFH_SCALEFIT, 1, 1, ">")
+        self.GroupBegin(ID.DIALOG_GROUP_DROPBOXES, c4d.BFH_SCALEFIT, 3, 1, "File Select", 0, 10, 10)
+        self.AddButton(ID.DIALOG_DROPBOX_BUTTON1,c4d.BFH_LEFT, initw=50,inith=0, name="<")
+        self.AddComboBox(ID.DIALOG_DROPBOX_MAIN,c4d.BFH_SCALEFIT, allowfiltering=True)
+        self.AddButton(ID.DIALOG_DROPBOX_BUTTON2,c4d.BFH_RIGHT, initw=50,inith=0, name=">")
         self.GroupEnd()
+
+        self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
+        self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
+        self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
+        self.GroupEnd()
+
+        self.GroupBegin(ID.DIALOG_GROUP3_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Map Select", 0, 10, 10)
+        self.AddStaticText(ID.DIALOG_TEXT_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select material", 0)
+        self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
+        self.GroupEnd()
+
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8000, "AO_Ambient occlusion")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8001, "NRM_Normal map")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8002, "DISP_Displacement")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8003, "DIFF_Diffuse")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8004, "COL_Color")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8005, "GLOSS_Glossiness")
+        maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+        
         # cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
         # cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
         # cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
@@ -583,8 +610,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_LIST_BUTTON, False)
         self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, False)
 
-        maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-        
         layout = c4d.BaseContainer()
         layout.SetLong(ID_CHECKBOX, c4d.LV_CHECKBOX)
         layout.SetLong(ID_NAME, c4d.LV_TREE)
@@ -603,6 +628,7 @@ class ReawoteSorterDialog(gui.GeDialog):
  
         # Set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
         root = self._treegui.SetRoot(self._treegui, self._listView, None)
+
         
         return True
 
@@ -633,6 +659,8 @@ class ReawoteSorterDialog(gui.GeDialog):
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
             materials = ["Material 1", "Material 2", "Material 3"]
             maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            # ID_CHILD2 = 8000
+            # self.AddChild(ID.DIALOG_DROPBOX_MAIN3, ID_CHILD2+1, map)
 
             ID_CHILD = 9000
             for index, folder in enumerate(sorted(same_path_dirs)):
@@ -713,14 +741,18 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # povoli se klikani na Select All
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
                 # self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, 9001)
 
         active_checkbox_list = []
             
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
             print("Tohle je long ", actual)
-            new = actual - 1
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, new)
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
+
+        if id == ID.DIALOG_DROPBOX_BUTTON2:
+            actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
 
         # pokud se klikne Select All button        
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
@@ -1061,7 +1093,7 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 470, 750)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 400, 750)
         return True
         
     def CoreMessage(self, id, msg):
