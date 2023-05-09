@@ -12,6 +12,7 @@ checkbox_list = []
 same_path_dirs = []
 material_to_add = []
 materialCount = []
+child_list = []
 path = ""
 
 ID_CHECKBOX = 999
@@ -375,7 +376,6 @@ class ListView(c4d.gui.TreeViewFunctions):
  
     def __init__(self):
         self.listOfTexture = list()
-        self.materials = ["Material 1", "Material 2", "Material 3"]
         self.maps = list()
         self.selectedEntry = 1003
  
@@ -545,6 +545,13 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8003, "DIFF_Diffuse")
         self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8004, "COL_Color")
         self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8005, "GLOSS_Glossiness")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8006, "ROUGH_Roughness")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8007, "METAL_Metallic")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8008, "SPEC_Specular")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8009, "SSS_Subsurface scattering")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8010, "SSSABSORB_SSS absorbtion")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8011, "ANIS_Anisotropy")
+        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8012, "SHEEN_Sheen")
         maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
         
         # cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
@@ -621,7 +628,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         # Set the header titles.
         self._treegui.SetHeaderText(ID_CHECKBOX, "Check")
         self._treegui.SetHeaderText(ID_NAME, "Name")
-        self._treegui.SetHeaderText(ID_OTHER, "Other")
+        # self._treegui.SetHeaderText(ID_OTHER, "Other")
         # self._treegui.SetHeaderText(ID_DROPDOWN, "Material")
         self._treegui.SetHeaderText(ID_DROPDOWN2, "Map")
         self._treegui.Refresh()
@@ -657,10 +664,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             folder_dict = {}
             checkbox_dict = {}
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
-            materials = ["Material 1", "Material 2", "Material 3"]
-            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-            # ID_CHILD2 = 8000
-            # self.AddChild(ID.DIALOG_DROPBOX_MAIN3, ID_CHILD2+1, map)
 
             ID_CHILD = 9000
             for index, folder in enumerate(sorted(same_path_dirs)):
@@ -670,7 +673,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # Add data to our DataStructure (ListView)
 
                 ID_CHILD += 1
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD + 1, folder)
+                child = self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD + 1, folder)
+                child_list.append(ID_CHILD)
 
                 # vytvoreni noveho id pomoci poctu prvku v listu
                 newID = len(self._listView.listOfTexture) + 1
@@ -743,16 +747,32 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, 9001)
 
+            pocet = len(checkbox_list)
+            cislo = 1
+            idicko = 4000
+            while pocet >= cislo:
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idicko, "Material " + str(cislo))
+                cislo+=1
+                idicko+=1
+
         active_checkbox_list = []
             
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
             print("Tohle je long ", actual)
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
+            print(actual-1)
+            print(child_list)
+            if actual-1 > 9000:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
+            else:
+                print("Jsem na hrane")
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
 
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
+            if actual+1 in child_list:
+                actual+=1
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual)
 
         # pokud se klikne Select All button        
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
@@ -912,6 +932,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                                     doc.EndUndo()
                                     material_to_add.append(mat)                                   
                                     self.SetString(ID.DIALOG_ERROR, "")
+
             c4d.EventAdd()
 
             return True
