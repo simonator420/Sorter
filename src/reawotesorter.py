@@ -56,6 +56,7 @@ class ID():
     DIALOG_SECONDARY_GROUP = 10011
     DIALOG_FOLDER_LIST = 100015
     DIALOG_LIST_BUTTON = 100017
+    DIALOG_ADD_TO_LIST_BUTTON = 100030
     DIALOG_LIST_CHECKBOX = 100013
     DIALOG_SELECT_ALL_BUTTON = 100018
 
@@ -520,7 +521,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupBegin(ID.DIALOG_MAIN_GROUP, defaultFlags, 1)
 
         self.GroupBegin(ID.DIALOG_FOLDER_GROUP, c4d.BFH_SCALEFIT, 2, 1, "Material folder", 0, 10, 10)
-        self.GroupBorderSpace(5, 0, 0, 0)
+        self.GroupBorderSpace(8, 0, 0, 0)
         self.AddStaticText(ID.DIALOG_FOLDER_TEXT, c4d.BFH_SCALEFIT, 0, 0, "Material folder", 0)
         self.AddButton(ID.DIALOG_FOLDER_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Browse")
         self.GroupEnd()
@@ -534,13 +535,13 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
-        self.GroupBorderSpace(5, 0, 0, 0)
+        self.GroupBorderSpace(8, 0, 0, 0)
         self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP3_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Map Select", 0, 10, 10)
-        self.GroupBorderSpace(5, 0, 0, 0)
+        self.GroupBorderSpace(8, 0, 0, 0)
         self.AddStaticText(ID.DIALOG_TEXT_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select material", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
@@ -561,8 +562,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         customgui.SetBool(c4d.TREEVIEW_ALTERNATE_BG, True)
         customgui.SetBool(c4d.TREEVIEW_CURSORKEYS, True)
         customgui.SetBool(c4d.TREEVIEW_NOENTERRENAME, False)
-        # self.AddButton(1001, c4d.BFH_CENTER, name="Add")
-        selectMaterials = self.AddButton(ID.DIALOG_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+        self.AddButton(ID.DIALOG_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+        self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
 
         self._treegui = self.AddCustomGui( 9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
@@ -820,9 +821,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_TEXT_DROPBOX, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN2, True)
             
-            first = child_list[0]
-            
-
             count = len(checkbox_list)
             n = 1
             idMat = 4000
