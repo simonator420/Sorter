@@ -533,6 +533,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
+        self.GroupBorderSpace(25,5, 25, 5)
         self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
@@ -639,6 +640,58 @@ class ReawoteSorterDialog(gui.GeDialog):
         
         return True
 
+    def AutoAssign(self, actualName):
+        if actualName:
+            parts = actualName.split(".")[0].split("_")
+            mapID = parts[3]
+            if mapID == "AO":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
+                print("Proslo AO")
+            elif mapID == "NRM":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+                print("Proslo NRM")
+            elif mapID == "NRM16":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+                print("Proslo NRM")
+            elif mapID == "DISP":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif mapID == "DISP16":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif mapID == "DIFF":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+                print("Proslo DIFF")
+            elif mapID == "COLOR" or mapID == "COL":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                print("Proslo COL")
+            elif mapID == "GLOSS":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+                print("Proslo GLOSS")
+            elif mapID == "ROUGH":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
+                print("Proslo ROUGH")
+            elif mapID == "METAL":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+                print("Proslo METAL")
+            elif mapID == "SPEC":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
+                print("Proslo SPEC")
+            elif mapID == "SPECLVL":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
+            elif mapID == "SSSABSORB_SSS":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
+                print("Proslo dlouhyshit")
+            elif mapID == "OPAC":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4510)
+                print("Proslo OPAC")
+            elif mapID == "ANIS":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
+                print("Proslo ANIS")
+            elif mapID == "SHEEN":
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
+                print("Proslo SHEEN")
+        else:
+            print("I'm on the edge")
+        
 
     def Command(self, id, msg,):
 
@@ -678,11 +731,9 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # subdirs = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
                 # folder_dict[file] = True
                 # Add data to our DataStructure (ListView)
-
                 while num <= 0:
                     firstName = file
                     num += 1
-
                 ID_CHILD += 1
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
                 child_list.append(ID_CHILD)
@@ -790,48 +841,30 @@ class ReawoteSorterDialog(gui.GeDialog):
             maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
             parts = firstName.split(".")[0].split("_")
             mapID = parts[3]
-            if firstName:
-                if mapID == "DIFF" or mapID == "COLOR" or mapID == "COL":
-                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
-                elif mapID == "AO":
-                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
-                    print("Proslo AO")
-                elif mapID == "NRM":
-                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-                    print("Proslo NRM")
-                elif mapID == "DISP" or "DISP16":
-                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
-                    print("Proslo DISP")
-                elif mapID == "DIFF":
-                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-                elif mapID == "COLOR" or mapID == "COL":
-                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
-                elif mapID == "IOR":
-                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
-                elif mapID == "NRM16":
-                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
+            self.AutoAssign(firstName)
                     
         active_checkbox_list = []
         
         # šipka zpět <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN) # id 9000
-            print(child_list)
-            print(child_name_list)
-            print(actual)
+            # print(child_list)
+            # print(child_name_list)
             if actual-1 in child_list:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
-            else:
-                print("I'm on the edge")
-                #self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
+                index = child_list.index(actual-1)
+                actualName = child_name_list[index]
+                self.AutoAssign(actualName)
 
         # šipka dopředu >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
             if actual+1 in child_list:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
-            else:
-                print("This is the last one ", actual)
+                next = actual+1
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, next)
+                index = child_list.index(next)
+                actualName = child_name_list[index]
+                self.AutoAssign(actualName)
 
         # pokud se klikne Select All button        
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
