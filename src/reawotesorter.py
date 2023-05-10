@@ -13,6 +13,9 @@ same_path_dirs = []
 material_to_add = []
 materialCount = []
 child_list = []
+child_name_list = []
+map_child_list = []
+maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 path = ""
 
 ID_CHECKBOX = 999
@@ -539,21 +542,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
 
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8000, "AO_Ambient occlusion")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8001, "NRM_Normal map")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8002, "DISP_Displacement")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8003, "DIFF_Diffuse")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8004, "COL_Color")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8005, "GLOSS_Glossiness")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8006, "ROUGH_Roughness")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8007, "METAL_Metallic")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8008, "SPEC_Specular")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8009, "SSS_Subsurface scattering")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8010, "SSSABSORB_SSS absorbtion")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8011, "ANIS_Anisotropy")
-        self.AddChild(ID.DIALOG_DROPBOX_MAIN3, 8012, "SHEEN_Sheen")
-        maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-        
+
+            
         # cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
         # cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
         # cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
@@ -672,83 +662,96 @@ class ReawoteSorterDialog(gui.GeDialog):
             same_path_dirs = [d for d in dir if os.path.isdir(os.path.join(path, d)) and d.startswith(os.path.basename(path))]
 
             folder_dict = {}
-            checkbox_dict = {}
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
+            #file = same_path_dirs[0]
+            # if file:
+            #     parts = file.split(".")[0].split("_")
+            #     mapID = parts[3]
 
+            firstName = None
+            num = 0
             ID_CHILD = 9000
-            for index, folder in enumerate(sorted(same_path_dirs)):
-                folder_path = os.path.join(path, folder)
-                subdirs = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
-                folder_dict[folder] = True
+            for file in dir:
+                parts = file.split(".")[0].split("_")
+                mapID = parts[3]
+                folder_path = os.path.join(path, file)
+                # subdirs = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
+                # folder_dict[file] = True
                 # Add data to our DataStructure (ListView)
 
+                while num <= 0:
+                    firstName = file
+                    num += 1
+
                 ID_CHILD += 1
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, folder)
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
                 child_list.append(ID_CHILD)
+                child_name_list.append(file)
+                print(firstName)
 
                 # vytvoreni noveho id pomoci poctu prvku v listu
                 newID = len(self._listView.listOfTexture) + 1
                 # vytvoreni noveho radku v ListView
-                tex = TextureObject(folder.format(newID))
+                tex = TextureObject(file.format(newID))
                 # pridani radku do listu
                 self._listView.listOfTexture.append(tex)
                 checkbox_list.append(tex)
-                print(f"{folder} checkbox byl vytvořen a přidán do listu")
+                print(f"{file} checkbox byl vytvořen a přidán do listu")
                 print(folder_path)
-                print(index)
+                #print(index)
                 print(" ")
                 # Refresh the TreeView
                 self._treegui.Refresh()
-                for targetFolderName in targetFolders:
-                    if targetFolderName in subdirs:
-                        targetFolder = os.path.join(folder_path, targetFolderName)
-                        dirPath = os.listdir(targetFolder)
-                        hasColor = False
-                        for file in dirPath:
-                                try: 
-                                    parts = file.split(".")[0].split("_")
-                                    manufacturer = parts[0]
-                                    productNumber = parts[1]
-                                    product = parts[2]
-                                    mapID = parts[3]
-                                    resolution = parts[4]
-                                    if mapID == "DIFF" or mapID == "COLOR" or mapID == "COL":
-                                        hasColor = True
-                                    if mapID == "DISP16":
-                                        self.has16bDisp = True
-                                        self.hasDisp = True
-                                    if mapID == "DISP":
-                                        self.hasDisp = True
-                                    if mapID == "AO":
-                                        self.hasAO = True
-                                    if mapID == "IOR":
-                                        self.hasIor = True
-                                    if mapID == "NRM16":
-                                        self.has16bNormal = True
-                                except:
-                                    pass
-                        if self.hasAO:
-                            self.SetBool(ID.DIALOG_MAP_AO_CB, True)
-                            self.Enable(ID.DIALOG_MAP_AO_CB, True)
-                        if self.hasDisp:
-                            self.SetBool(ID.DIALOG_MAP_DISPL_CB, True)
-                            self.Enable(ID.DIALOG_MAP_DISPL_CB, True)
-                        if self.has16bDisp:
-                            self.SetBool(ID.DIALOG_MAP_16B_DISPL_CB, True)
-                            self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
-                        if self.has16bNormal:
-                            self.SetBool(ID.DIALOG_MAP_16B_NORMAL_CB, True)
-                            self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
-                        if self.hasIor:
-                            self.SetBool(ID.DIALOG_MAP_IOR_CB, False)
-                            self.Enable(ID.DIALOG_MAP_IOR_CB, True)
-                        if hasColor:
-                            self.materialFolder = path
-                            self.Enable(ID.DIALOG_LOAD_BUTTON, True)
-                            self.SetError("")
-                        else:
-                            self.SetError("One or more folders do not contain the correct Reawote material.")
-                            print(folder, " neobsahuje spravnou slozku")
+                # for targetFolderName in targetFolders:
+                #     if targetFolderName in subdirs:
+                #         targetFolder = os.path.join(folder_path, targetFolderName)
+                #         dirPath = os.listdir(targetFolder)
+                #         hasColor = False
+                #         for file1 in dirPath:
+                #                 try: 
+                #                     parts = file1.split(".")[0].split("_")
+                #                     manufacturer = parts[0]
+                #                     productNumber = parts[1]
+                #                     product = parts[2]
+                #                     mapID = parts[3]
+                #                     resolution = parts[4]
+                #                     if mapID == "DIFF" or mapID == "COLOR" or mapID == "COL":
+                #                         hasColor = True
+                #                     if mapID == "DISP16":
+                #                         self.has16bDisp = True
+                #                         self.hasDisp = True
+                #                     if mapID == "DISP":
+                #                         self.hasDisp = True
+                #                     if mapID == "AO":
+                #                         self.hasAO = True
+                #                     if mapID == "IOR":
+                #                         self.hasIor = True
+                #                     if mapID == "NRM16":
+                #                         self.has16bNormal = True
+                #                 except:
+                #                     pass
+                #         if self.hasAO:
+                #             self.SetBool(ID.DIALOG_MAP_AO_CB, True)
+                #             self.Enable(ID.DIALOG_MAP_AO_CB, True)
+                #         if self.hasDisp:
+                #             self.SetBool(ID.DIALOG_MAP_DISPL_CB, True)
+                #             self.Enable(ID.DIALOG_MAP_DISPL_CB, True)
+                #         if self.has16bDisp:
+                #             self.SetBool(ID.DIALOG_MAP_16B_DISPL_CB, True)
+                #             self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
+                #         if self.has16bNormal:
+                #             self.SetBool(ID.DIALOG_MAP_16B_NORMAL_CB, True)
+                #             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
+                #         if self.hasIor:
+                #             self.SetBool(ID.DIALOG_MAP_IOR_CB, False)
+                #             self.Enable(ID.DIALOG_MAP_IOR_CB, True)
+                #         if hasColor:
+                #             self.materialFolder = path
+                #             self.Enable(ID.DIALOG_LOAD_BUTTON, True)
+                #             self.SetError("")
+                #         else:
+                #             self.SetError("One or more folders do not contain the correct Reawote material.")
+                #             print(folder, " neobsahuje spravnou slozku")
 
                 # povoli se klikani na Load Selected Materials
                 self.Enable(ID.DIALOG_LIST_BUTTON, True)
@@ -756,8 +759,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
                 # self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
 
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
-            self.Enable(ID.DIALOG_DROPBOX_BUTTON1, False)
+            self.Enable(ID.DIALOG_DROPBOX_BUTTON1, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN, True)
             self.Enable(ID.DIALOG_DROPBOX_BUTTON2, True)
 
@@ -766,19 +768,57 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             self.Enable(ID.DIALOG_TEXT_DROPBOX, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN2, True)
-            pocet = len(checkbox_list)
-            cislo = 1
-            idicko = 4000
-            while pocet >= cislo:
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idicko, "Material " + str(cislo))
-                cislo+=1
-                idicko+=1
+            
+            first = child_list[0]
+            
 
+            count = len(checkbox_list)
+            n = 1
+            idMat = 4000
+            while count >= n:
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idMat, "Material " + str(n))
+                n+=1
+                idMat+=1
+            
+            idMap = 4500
+            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            for map in maps:
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
+                idMap+=1
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
+            #TODO pro vsechny mapy
+            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+            parts = firstName.split(".")[0].split("_")
+            mapID = parts[3]
+            if firstName:
+                if mapID == "DIFF" or mapID == "COLOR" or mapID == "COL":
+                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
+                elif mapID == "AO":
+                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
+                    print("Proslo AO")
+                elif mapID == "NRM":
+                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+                    print("Proslo NRM")
+                elif mapID == "DISP" or "DISP16":
+                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+                    print("Proslo DISP")
+                elif mapID == "DIFF":
+                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+                elif mapID == "COLOR" or mapID == "COL":
+                    self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                elif mapID == "IOR":
+                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
+                elif mapID == "NRM16":
+                    self.SetInt32(ID.DIALOG_TEXT2_DROPBOX, mapID)
+                    
         active_checkbox_list = []
         
         # šipka zpět <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
-            actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN) # id 9000
+            print(child_list)
+            print(child_name_list)
+            print(actual)
             if actual-1 in child_list:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
             else:
