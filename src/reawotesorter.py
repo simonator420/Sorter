@@ -640,6 +640,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         
         return True
 
+    # TODO GetInt32 instead
     def AutoAssign(self, actualName):
         if actualName:
             parts = actualName.split(".")[0].split("_")
