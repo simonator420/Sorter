@@ -617,6 +617,16 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_LIST_BUTTON, False)
         self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, False)
 
+        self.Enable(ID.DIALOG_DROPBOX_BUTTON1, False)
+        self.Enable(ID.DIALOG_DROPBOX_MAIN, False)
+        self.Enable(ID.DIALOG_DROPBOX_BUTTON2, False)
+
+        self.Enable(ID.DIALOG_TEXT2_DROPBOX, False)
+        self.Enable(ID.DIALOG_DROPBOX_MAIN3, False)
+
+        self.Enable(ID.DIALOG_TEXT_DROPBOX, False)
+        self.Enable(ID.DIALOG_DROPBOX_MAIN2, False)
+
         layout = c4d.BaseContainer()
         layout.SetLong(ID_CHECKBOX, c4d.LV_CHECKBOX)
         layout.SetLong(ID_NAME, c4d.LV_TREE)
@@ -673,7 +683,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # Add data to our DataStructure (ListView)
 
                 ID_CHILD += 1
-                child = self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD + 1, folder)
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, folder)
                 child_list.append(ID_CHILD)
 
                 # vytvoreni noveho id pomoci poctu prvku v listu
@@ -745,8 +755,17 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # povoli se klikani na Select All
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
                 # self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, 9001)
 
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
+            self.Enable(ID.DIALOG_DROPBOX_BUTTON1, False)
+            self.Enable(ID.DIALOG_DROPBOX_MAIN, True)
+            self.Enable(ID.DIALOG_DROPBOX_BUTTON2, True)
+
+            self.Enable(ID.DIALOG_TEXT2_DROPBOX, True)
+            self.Enable(ID.DIALOG_DROPBOX_MAIN3, True)
+
+            self.Enable(ID.DIALOG_TEXT_DROPBOX, True)
+            self.Enable(ID.DIALOG_DROPBOX_MAIN2, True)
             pocet = len(checkbox_list)
             cislo = 1
             idicko = 4000
@@ -756,23 +775,23 @@ class ReawoteSorterDialog(gui.GeDialog):
                 idicko+=1
 
         active_checkbox_list = []
-            
+        
+        # šipka zpět <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
-            print("Tohle je long ", actual)
-            print(actual-1)
-            print(child_list)
-            if actual-1 > 9000:
+            if actual-1 in child_list:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual-1)
             else:
-                print("Jsem na hrane")
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
+                print("I'm on the edge")
+                #self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
 
+        # šipka dopředu >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
             if actual+1 in child_list:
-                actual+=1
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN, actual+1)
+            else:
+                print("This is the last one ", actual)
 
         # pokud se klikne Select All button        
         if id == ID.DIALOG_SELECT_ALL_BUTTON:

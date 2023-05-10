@@ -74,7 +74,7 @@ if __name__=='__main__':
     import reawotesorter as ReawoteSorter
 
     icon = c4d.bitmaps.BaseBitmap()
-    icon.InitWith(os.path.join(ROOT_DIR, "res", "images", "Reawote_logo_small.jpg"))
+    icon.InitWith(os.path.join(ROOT_DIR, "res", "images", "icon1 .png"))
 
     loader=ReawoteSorter.ReawoteSorter()
     loader.thread=CommandThread()
