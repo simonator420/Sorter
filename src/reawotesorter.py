@@ -717,10 +717,6 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             folder_dict = {}
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
-            #file = same_path_dirs[0]
-            # if file:
-            #     parts = file.split(".")[0].split("_")
-            #     mapID = parts[3]
 
             firstName = None
             num = 0
@@ -809,7 +805,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.Enable(ID.DIALOG_LIST_BUTTON, True)
                 # povoli se klikani na Select All
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
-                # self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
 
             self.Enable(ID.DIALOG_DROPBOX_BUTTON1, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN, True)
