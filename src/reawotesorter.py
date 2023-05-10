@@ -521,7 +521,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupBegin(ID.DIALOG_MAIN_GROUP, defaultFlags, 1)
 
         self.GroupBegin(ID.DIALOG_FOLDER_GROUP, c4d.BFH_SCALEFIT, 2, 1, "Material folder", 0, 10, 10)
-        self.GroupBorderSpace(8, 0, 0, 0)
+        self.GroupBorderSpace(8, 0, 0, 2)
         self.AddStaticText(ID.DIALOG_FOLDER_TEXT, c4d.BFH_SCALEFIT, 0, 0, "Material folder", 0)
         self.AddButton(ID.DIALOG_FOLDER_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Browse")
         self.GroupEnd()
@@ -535,13 +535,13 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
-        self.GroupBorderSpace(8, 0, 0, 0)
+        self.GroupBorderSpace(8, 2, 0, 2)
         self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP3_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Map Select", 0, 10, 10)
-        self.GroupBorderSpace(8, 0, 0, 0)
+        self.GroupBorderSpace(8, 2, 0, 2)
         self.AddStaticText(ID.DIALOG_TEXT_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select material", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
@@ -552,6 +552,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         # cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
         # bLoad = self.AddButton(ID.DIALOG_LOAD_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Load material")
         # strErr = self.AddStaticText(ID.DIALOG_ERROR, c4d.BFH_SCALEFIT, 64, 10, "", 0)
+        
         customgui = c4d.BaseContainer()
         customgui.SetBool(c4d.TREEVIEW_BORDER, c4d.BORDER_THIN_IN)
         customgui.SetBool(c4d.TREEVIEW_HAS_HEADER, True)
@@ -562,8 +563,9 @@ class ReawoteSorterDialog(gui.GeDialog):
         customgui.SetBool(c4d.TREEVIEW_ALTERNATE_BG, True)
         customgui.SetBool(c4d.TREEVIEW_CURSORKEYS, True)
         customgui.SetBool(c4d.TREEVIEW_NOENTERRENAME, False)
-        self.AddButton(ID.DIALOG_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
+        self.AddButton(ID.DIALOG_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
 
         self._treegui = self.AddCustomGui( 9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
@@ -576,9 +578,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupEnd(ID.DIALOG_MAIN_GROUP)
         self.GroupEnd(ID.DIALOG_SCROLL_GROUP)
         self.Reset()
-
-        color = c4d.Vector(1, 0, 0)
-        # self.SetDefaultColor(strErr, c4d.COLOR_TEXT, color)
 
         self.SetTimer(1000)
 
@@ -647,46 +646,34 @@ class ReawoteSorterDialog(gui.GeDialog):
             mapID = parts[3]
             if mapID == "AO":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
-                print("Proslo AO")
             elif mapID == "NRM":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-                print("Proslo NRM")
             elif mapID == "NRM16":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-                print("Proslo NRM")
             elif mapID == "DISP":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif mapID == "DISP16":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif mapID == "DIFF":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-                print("Proslo DIFF")
             elif mapID == "COLOR" or mapID == "COL":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
-                print("Proslo COL")
             elif mapID == "GLOSS":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
-                print("Proslo GLOSS")
             elif mapID == "ROUGH":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
-                print("Proslo ROUGH")
             elif mapID == "METAL":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
-                print("Proslo METAL")
             elif mapID == "SPEC":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-                print("Proslo SPEC")
             elif mapID == "SPECLVL":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
             elif mapID == "SSSABSORB_SSS":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
-                print("Proslo dlouhyshit")
             elif mapID == "OPAC":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4510)
-                print("Proslo OPAC")
             elif mapID == "ANIS":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
-                print("Proslo ANIS")
             elif mapID == "SHEEN":
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
                 print("Proslo SHEEN")
@@ -830,8 +817,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
                 idMap+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
-            #TODO pro vsechny mapy
-            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
             parts = firstName.split(".")[0].split("_")
             mapID = parts[3]
             self.AutoAssign(firstName)
@@ -1022,7 +1007,6 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             return True
         
-
     def SetError(self, message):
         if not message:
             message = ""
@@ -1047,7 +1031,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
         mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
-        
 
         fusionShader = None
 
@@ -1187,7 +1170,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_LOAD_BUTTON, False)
         # self.Enable(ID.DIALOG_LIST_BUTTON, False)
         
-
 class ReawoteSorter(plugins.CommandData):
     
     thread = None
@@ -1199,7 +1181,7 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 400, 750)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 600, 1750)
         return True
         
     def CoreMessage(self, id, msg):
