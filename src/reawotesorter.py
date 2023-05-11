@@ -55,7 +55,7 @@ class ID():
     DIALOG_SCROLL_GROUP_TWO = 100016
     DIALOG_SECONDARY_GROUP = 10011
     DIALOG_FOLDER_LIST = 100015
-    DIALOG_LIST_BUTTON = 100017
+    FILTER_MATERIALS_BUTTON = 100017
     DIALOG_ADD_TO_LIST_BUTTON = 100030
     DIALOG_LIST_CHECKBOX = 100013
     DIALOG_SELECT_ALL_BUTTON = 100018
@@ -589,7 +589,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         customgui.SetBool(c4d.TREEVIEW_NOENTERRENAME, False)
 
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
-        self.AddButton(ID.DIALOG_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+        self.AddButton(ID.FILTER_MATERIALS_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
 
         self._treegui = self.AddCustomGui( 9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
@@ -629,7 +629,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         self.Enable(ID.DIALOG_LOAD_BUTTON, False)
 
-        self.Enable(ID.DIALOG_LIST_BUTTON, False)
+        self.Enable(ID.FILTER_MATERIALS_BUTTON, False)
         self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, False)
 
         self.Enable(ID.DIALOG_DROPBOX_BUTTON1, False)
@@ -706,7 +706,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                 print("Proslo SHEEN")
         else:
             print("I'm on the edge")
-        
+
+    def GetNameFromID(self, id: int, indexList: list, nameList: list):
+        index = indexList.index(id)
+        name = nameList[index]
+        return name
 
     def Command(self, id, msg,):
 
@@ -817,7 +821,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 #             print(folder, " neobsahuje spravnou slozku")
 
                 # povoli se klikani na Load Selected Materials
-                self.Enable(ID.DIALOG_LIST_BUTTON, True)
+                self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
                 # povoli se klikani na Select All
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
 
@@ -843,6 +847,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             for map in maps:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
+                map_child_list.append(idMap)                
                 idMap+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
             parts = firstName.split(".")[0].split("_")
@@ -883,9 +888,19 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
 
-        
+        if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
+            selectedFileID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
+            selectedFileName = self.GetNameFromID(selectedFileID, child_list, child_name_list)
+            print("Selected file: ", selectedFileName)
+            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
+            selectedMapID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
+            selectedMapName = self.GetNameFromID(selectedMapID, map_child_list, maps)
+            print("Selected map: ", selectedMapName)
+            selectedMaterialID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN2)
+            print("Selected material:", selectedMaterialID)
 
-        if id == ID.DIALOG_LIST_BUTTON:
+
+        if id == ID.FILTER_MATERIALS_BUTTON:
             path = self.GetString(ID.DIALOG_FOLDER_LIST)
             dir = os.listdir(path)
             targetFolder = None
@@ -1198,7 +1213,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_MAP_IOR_CB, False)
 
         self.Enable(ID.DIALOG_LOAD_BUTTON, False)
-        # self.Enable(ID.DIALOG_LIST_BUTTON, False)
+        # self.Enable(ID.FILTER_MATERIALS_BUTTON, False)
         
 class ReawoteSorter(plugins.CommandData):
     
