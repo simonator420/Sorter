@@ -14,8 +14,10 @@ material_to_add = []
 materialCount = []
 child_list = []
 child_name_list = []
-map_child_list = []
-maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+mapIdList = []
+materialIdList = []
+materialNameList = []
+mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 path = ""
 
 ID_CHECKBOX = 999
@@ -482,7 +484,7 @@ class ListView(c4d.gui.TreeViewFunctions):
             if tex.IsSelected:
                 self.listOfTexture.remove(tex)
     
-    # maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+    # mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 
     def GetDropDownMenu(self, root, userdata, obj, lColumn, menuInfo):
         doc = c4d.documents.GetActiveDocument()
@@ -735,7 +737,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             folder_dict = {}
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
-            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             firstName = None
             num = 0
             ID_CHILD = 9000
@@ -839,15 +841,18 @@ class ReawoteSorterDialog(gui.GeDialog):
             n = 1
             idMat = 4000
             while count >= n:
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idMat, "Material " + str(n))
+                materialName = "Material " + str(n)
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idMat, materialName)
                 n+=1
+                materialIdList.append(idMat)
+                materialNameList.append(materialName)
                 idMat+=1
             
             idMap = 4500
-            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-            for map in maps:
+            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            for map in mapNamesList:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
-                map_child_list.append(idMap)                
+                mapIdList.append(idMap)                
                 idMap+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
             parts = firstName.split(".")[0].split("_")
@@ -892,12 +897,15 @@ class ReawoteSorterDialog(gui.GeDialog):
             selectedFileID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
             selectedFileName = self.GetNameFromID(selectedFileID, child_list, child_name_list)
             print("Selected file: ", selectedFileName)
-            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
+            
+            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
             selectedMapID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
-            selectedMapName = self.GetNameFromID(selectedMapID, map_child_list, maps)
+            selectedMapName = self.GetNameFromID(selectedMapID, mapIdList, mapNamesList)
             print("Selected map: ", selectedMapName)
+            
             selectedMaterialID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN2)
-            print("Selected material:", selectedMaterialID)
+            selectedMaterialName = self.GetNameFromID(selectedMaterialID, materialIdList, materialNameList)
+            print("Selected material:", selectedMaterialName)
 
 
         if id == ID.FILTER_MATERIALS_BUTTON:
