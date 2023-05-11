@@ -349,15 +349,17 @@ class ID():
 
 class TextureObject(object):
     texturePath = "TexPath"
-    otherData = "OtherData"
-    materialDropdownData = "MatData"
-    mapsDropdownData = "MapData"
+    otherData = ""
+    materialData = "MatData"
+    mapsData = "MapData"
     _selected = False
 
-    def __init__(self, texturePath):
+    def __init__(self, texturePath, otherData):
         self.texturePath = texturePath
-        self.materialDropdownData+= texturePath
-        self.selectedEntry = None
+        self.materialData+= texturePath
+        self.mapsData = texturePath
+        self.otherData = otherData
+        # self.selectedEntry = None
 
     @property
     def IsSelected(self):
@@ -381,7 +383,7 @@ class ListView(c4d.gui.TreeViewFunctions):
     def __init__(self):
         self.listOfTexture = list()
         self.maps = list()
-        self.selectedEntry = 1003
+        # self.selectedEntry = 1003
  
     def IsResizeColAllowed(self, root, userdata, lColID):
         return True
@@ -452,7 +454,7 @@ class ListView(c4d.gui.TreeViewFunctions):
         return str(obj) # Or obj.texturePath
  
     def DrawCell(self, root, userdata, obj, col, drawinfo, bgColor):
-        if col == ID_DROPDOWN:
+        if col == ID_OTHER:
             name = obj.otherData
             geUserArea = drawinfo["frame"]
             w = geUserArea.DrawGetTextWidth(name)
@@ -460,6 +462,15 @@ class ListView(c4d.gui.TreeViewFunctions):
             xpos = drawinfo["xpos"]
             ypos = drawinfo["ypos"] + drawinfo["height"]
             drawinfo["frame"].DrawText(name, xpos, ypos - h * 1.1)
+        
+        # if col == ID_DROPDOWN:
+        #     name = obj.otherData
+        #     geUserArea = drawinfo["frame"]
+        #     w = geUserArea.DrawGetTextWidth(name)
+        #     h = geUserArea.DrawGetFontHeight()
+        #     xpos = drawinfo["xpos"]
+        #     ypos = drawinfo["ypos"] + drawinfo["height"]
+        #     drawinfo["frame"].DrawText(name, xpos, ypos - h * 1.1)
  
     def DoubleClick(self, root, userdata, obj, col, mouseinfo):
         c4d.gui.MessageDialog("You clicked on " + str(obj))
@@ -471,27 +482,40 @@ class ListView(c4d.gui.TreeViewFunctions):
             if tex.IsSelected:
                 self.listOfTexture.remove(tex)
     
+    # maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+
     def GetDropDownMenu(self, root, userdata, obj, lColumn, menuInfo):
         doc = c4d.documents.GetActiveDocument()
-        menuInfo["entry"] = self.selectedEntry # Select the second entry
-        menuInfo["menu"][1000] = "AO_Ambient occlusion"
-        menuInfo["menu"][1001] = "NRM_Normal map"
-        menuInfo["menu"][1002] = "DISP_Displacement"
-        menuInfo["menu"][1003] = "DIFF_Diffuse"
-        menuInfo["menu"][1004] = "COL_Color"
-        menuInfo["menu"][1005] = "GLOSS_Glossiness"
-        menuInfo["menu"][1006] = "ROUGH_Roughness"
-        menuInfo["menu"][1007] = "METAL_Metallic"
-        menuInfo["menu"][1008] = "SPEC_Specular"
-        menuInfo["menu"][1009] = "SSS_Subsurface scattering"
-        menuInfo["menu"][1010] = "SSSABSORB_SSS absorbtion"
-        menuInfo["menu"][1011] = "OPAC_Opacit"
-        menuInfo["menu"][1012] = "ANIS_Anisotropy"
-        menuInfo["menu"][1013] = "SHEEN_Sheen"
-        menuInfo["state"] = int(menuInfo["state"])  # Workaround to not have warning in Cinema 4D. Will be fixed in the next C4D version.
+
+        # index = root.index(obj)
+        # if index % 2 == 0:
+        #     menuInfo["menu"][2023] = "Even row First Option"
+        #     menuInfo["menu"][2024] = "Even row second option"
+        #     print("Proslo if index % 2 == 0:")
+        # else:
+        #     menuInfo["menu"][2025] = "Odd row first section"
+        #     menuInfo["menu"][2026] = "Odd row second option"
+        #     print("Proslo else index %")
+        
+        # menuInfo["entry"] = self.selectedEntry # Select the second entry
+        # menuInfo["menu"][1000] = "AO_Ambient occlusion"
+        # menuInfo["menu"][1001] = "NRM_Normal map"
+        # menuInfo["menu"][1002] = "DISP_Displacement"
+        # menuInfo["menu"][1003] = "DIFF_Diffuse"
+        # menuInfo["menu"][1004] = "COL_Color"
+        # menuInfo["menu"][1005] = "GLOSS_Glossiness"
+        # menuInfo["menu"][1006] = "ROUGH_Roughness"
+        # menuInfo["menu"][1007] = "METAL_Metallic"
+        # menuInfo["menu"][1008] = "SPEC_Specular"
+        # menuInfo["menu"][1009] = "SSS_Subsurface scattering"
+        # menuInfo["menu"][1010] = "SSSABSORB_SSS absorbtion"
+        # menuInfo["menu"][1011] = "OPAC_Opacit"
+        # menuInfo["menu"][1012] = "ANIS_Anisotropy"
+        # menuInfo["menu"][1013] = "SHEEN_Sheen"
+        # menuInfo["state"] = int(menuInfo["state"])  # Workaround to not have warning in Cinema 4D. Will be fixed in the next C4D version.
 
     def SetDropDownMenu(self, root, userdata, obj, lColumn, entry):
-        self.selectedEntry = entry
+        # self.selectedEntry = entry
         print(f"User selected the entry with the ID: {entry}")
 
 class ReawoteSorterDialog(gui.GeDialog):
@@ -621,17 +645,19 @@ class ReawoteSorterDialog(gui.GeDialog):
         layout = c4d.BaseContainer()
         layout.SetLong(ID_CHECKBOX, c4d.LV_CHECKBOX)
         layout.SetLong(ID_NAME, c4d.LV_TREE)
-        layout.SetLong(ID_DROPDOWN, c4d.LV_DROPDOWN)
-        layout.SetLong(ID_DROPDOWN2, c4d.LV_DROPDOWN)
+        # layout.SetLong(ID_DROPDOWN, c4d.LV_DROPDOWN)
+        # layout.SetLong(ID_DROPDOWN2, c4d.LV_DROPDOWN)
+        layout.SetLong(ID_OTHER, c4d.LV_USER)
 
-        self._treegui.SetLayout(3, layout)
+        self._treegui.SetLayout(5, layout)
 
         # Set the header titles.
         self._treegui.SetHeaderText(ID_CHECKBOX, "Check")
         self._treegui.SetHeaderText(ID_NAME, "Name")
-        # self._treegui.SetHeaderText(ID_OTHER, "Other")
+        self._treegui.SetHeaderText(ID_OTHER, "Other")
         # self._treegui.SetHeaderText(ID_DROPDOWN, "Material")
-        self._treegui.SetHeaderText(ID_DROPDOWN2, "Map")
+        self._treegui.SetHeaderText(ID_DROPDOWN, "Map")
+        self._treegui.SetHeaderText(ID_DROPDOWN2, "Material")
         self._treegui.Refresh()
  
         # Set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
@@ -705,7 +731,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             folder_dict = {}
             targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
-
+            maps = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             firstName = None
             num = 0
             ID_CHILD = 9000
@@ -728,7 +754,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # vytvoreni noveho id pomoci poctu prvku v listu
                 newID = len(self._listView.listOfTexture) + 1
                 # vytvoreni noveho radku v ListView
-                tex = TextureObject(file.format(newID))
+                tex = TextureObject(file.format(newID),firstName)
                 # pridani radku do listu
                 self._listView.listOfTexture.append(tex)
                 checkbox_list.append(tex)
@@ -738,6 +764,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 print(" ")
                 # Refresh the TreeView
                 self._treegui.Refresh()
+                print("Ze by tady?")
                 # for targetFolderName in targetFolders:
                 #     if targetFolderName in subdirs:
                 #         targetFolder = os.path.join(folder_path, targetFolderName)
@@ -834,6 +861,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 index = child_list.index(actual-1)
                 actualName = child_name_list[index]
                 self.AutoAssign(actualName)
+        
 
         # šipka dopředu >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
@@ -855,6 +883,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
 
+        
 
         if id == ID.DIALOG_LIST_BUTTON:
             path = self.GetString(ID.DIALOG_FOLDER_LIST)
@@ -1182,7 +1211,7 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -1, -1, 440, 750)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -3, -3, 475, 750)
         return True
         
     def CoreMessage(self, id, msg):
