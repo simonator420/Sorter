@@ -909,18 +909,24 @@ class ReawoteSorterDialog(gui.GeDialog):
             self._listView.listOfTexture.append(tex)
             self._treegui.Refresh()
             tex_list.append(tex)
+
             selectedFiles.append(selectedFileName)
             selectedMaterials.append(selectedMaterialName)
             selectedMaps.append(selectedMapName)
+            
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         if id == ID.FILTER_MATERIALS_BUTTON:
-            assignedMaterial = ""
+            # projde vsechny checkboxy
             for index, checkbox in enumerate(tex_list):
                 print("Tohle je checkbox: ", checkbox)
+                # pokud je checkbox zaskrtnut
                 if checkbox.IsSelected:
+                    # ulozi se index zaskrtnuteho checkboxu v jeho puvodnim listu vybranych materialu jako assignedMaterial
                     assignedMaterial = selectedMaterials[index]
+                    # projde vsechny vybrane materialy ktere jsou prirazeny k checkboxum
                     for index, matchingMaterial in enumerate(selectedMaterials):
+                        # pokud je vybrany material stejny jako material zaskrtnuteho checkboxu tak se jeho checkbox taky zaskrtne
                         if matchingMaterial == assignedMaterial:
                             assignedFile = tex_list[index]
                             assignedFile.Select()
@@ -928,8 +934,16 @@ class ReawoteSorterDialog(gui.GeDialog):
                             print(assignedFile)
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
+            select_all = True
             for item in tex_list:
-                item.Select()
+                if item.IsSelected == False:
+                    select_all = False
+            if select_all == True:
+                for item in tex_list:
+                    item.Deselect()
+            else:
+                for item in tex_list:
+                    item.Select()
             self._treegui.Refresh()
                     
 
