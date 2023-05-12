@@ -17,7 +17,12 @@ child_name_list = []
 mapIdList = []
 materialIdList = []
 materialNameList = []
+selectedMaterials = []
+selectedMaps = []
+selectedFiles = []
+tex_list = []
 mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+newID = 0
 path = ""
 
 ID_CHECKBOX = 999
@@ -678,8 +683,6 @@ class ReawoteSorterDialog(gui.GeDialog):
     # TODO GetInt32 instead
     def AutoAssign(self, actualName):
         if actualName:
-            parts = actualName.split(".")[0].split("_")
-            mapID = parts[3]
             if "AO" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
             elif "NRM" in actualName:
@@ -923,11 +926,30 @@ class ReawoteSorterDialog(gui.GeDialog):
             print("Selected material:", selectedMaterialName)
 
             newID = len(self._listView.listOfTexture) + 1
+            print(newID)
             tex = TextureObject(selectedFileName.format(newID),selectedMapName, selectedMaterialName)
             self._listView.listOfTexture.append(tex)
             self._treegui.Refresh()
+            tex_list.append(tex)
+            selectedFiles.append(selectedFileName)
+            selectedMaterials.append(selectedMaterialName)
+            selectedMaps.append(selectedMapName)
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
+        if id == ID.FILTER_MATERIALS_BUTTON:
+            assignedMaterial = ""
+            for index, checkbox in enumerate(tex_list):
+                print("Tohle je checkbox: ", checkbox)
+                if checkbox.IsSelected:
+                    assignedMaterial = selectedMaterials[index]
+                    print("Checkbox s nazvem ", checkbox, " je ceknutej a ma prirazen material ", assignedMaterial)
+                    for index, matros in enumerate(selectedMaterials):
+                        if matros == assignedMaterial:
+                            assignedFile = tex_list[index]
+                            assignedFile.Select()
+                            self._treegui.Refresh()
+                            print(assignedFile)
+                    
 
         # if id == ID.FILTER_MATERIALS_BUTTON:
         #     path = self.GetString(ID.DIALOG_FOLDER_LIST)
@@ -1080,6 +1102,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         #     c4d.EventAdd()
 
         #     return True
+
+
         
     def SetError(self, message):
         if not message:
