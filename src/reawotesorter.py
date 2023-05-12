@@ -942,9 +942,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 print("Tohle je checkbox: ", checkbox)
                 if checkbox.IsSelected:
                     assignedMaterial = selectedMaterials[index]
-                    print("Checkbox s nazvem ", checkbox, " je ceknutej a ma prirazen material ", assignedMaterial)
-                    for index, matros in enumerate(selectedMaterials):
-                        if matros == assignedMaterial:
+                    for index, matchingMaterial in enumerate(selectedMaterials):
+                        if matchingMaterial == assignedMaterial:
                             assignedFile = tex_list[index]
                             assignedFile.Select()
                             self._treegui.Refresh()
