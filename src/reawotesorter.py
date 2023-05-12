@@ -762,18 +762,11 @@ class ReawoteSorterDialog(gui.GeDialog):
             print(path)
             # ulozeni vsech souboru a slozek v ceste do slozky
             dir = os.listdir(path)
-
-            same_path_dirs = [d for d in dir if os.path.isdir(os.path.join(path, d)) and d.startswith(os.path.basename(path))]
-
-            folder_dict = {}
-            targetFolders = ["1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K"]
             mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             firstName = None
             num = 0
             ID_CHILD = 9000
             for file in dir:
-                parts = file.split(".")[0].split("_")
-                mapID = parts[3]
                 folder_path = os.path.join(path, file)
                 # subdirs = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
                 # folder_dict[file] = True
@@ -786,13 +779,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 child_list.append(ID_CHILD)
                 child_name_list.append(file)
                 print(firstName)
-
-                # vytvoreni noveho id pomoci poctu prvku v listu
-                # newID = len(self._listView.listOfTexture) + 1
-                # vytvoreni noveho radku v ListView
-                # tex = TextureObject(file.format(newID),firstName)
-                # pridani radku do listu
-                # self._listView.listOfTexture.append(tex)
                 checkbox_list.append(file)
                 print(f"{file} checkbox byl vytvořen a přidán do listu")
                 print(folder_path)
@@ -899,14 +885,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
-        # pokud se klikne Select All button        
-        if id == ID.DIALOG_SELECT_ALL_BUTTON:
-            for item in checkbox_list:
-                item.Select()
-                # if item.IsSelected:
-                #     print(item)
-            self._treegui.Refresh()
-
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
@@ -948,6 +926,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                             assignedFile.Select()
                             self._treegui.Refresh()
                             print(assignedFile)
+
+        if id == ID.DIALOG_SELECT_ALL_BUTTON:
+            for item in tex_list:
+                item.Select()
+            self._treegui.Refresh()
                     
 
         # if id == ID.FILTER_MATERIALS_BUTTON:
