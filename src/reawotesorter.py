@@ -14,14 +14,14 @@ material_to_add = []
 materialCount = []
 child_list = []
 child_name_list = []
-mapIdList = []
-materialIdList = []
-materialNameList = []
-selectedMaterials = []
-selectedMaps = []
-selectedFiles = []
+map_id_list = []
+material_id_list = []
+material_name_list = []
+selected_materials = []
+selected_maps = []
+selected_files = []
 tex_list = []
-mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 newID = 0
 path = ""
 
@@ -29,6 +29,7 @@ ID_CHECKBOX = 999
 ID_NAME = 998
 ID_MAP_NAME = 997
 ID_MATERIAL_NAME = 996
+ID_CHILD = 9000
 
 IDS_REAWOTE_PBR_CONVERTER = 20000
 IDS_DIALOG_BROWSE = 10001
@@ -90,6 +91,8 @@ class ID():
     DIALOG_GROUP_MINI_BUTTONS = 100031
     DIALOG_SELECT_ALL_BUTTON = 100018
     DIALOG_ADD_TO_QUEUE_BUTTON = 100032
+
+    ID_CHILD = 9000
 
     # Todo: generate this with swig
     PLUGINID_CORONA4D_MATERIAL = 1032100
@@ -503,7 +506,7 @@ class ListView(c4d.gui.TreeViewFunctions):
             if tex.IsSelected:
                 self.listOfTexture.remove(tex)
     
-    # mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
+    # map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 
     def GetDropDownMenu(self, root, userdata, obj, lColumn, menuInfo):
         doc = c4d.documents.GetActiveDocument()
@@ -553,7 +556,6 @@ class ReawoteSorterDialog(gui.GeDialog):
     def __init__(self):
         super(ReawoteSorterDialog, self).__init__()
         pass
-
 
     def CreateLayout(self):
 
@@ -617,7 +619,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddButton(ID.DIALOG_ADD_TO_QUEUE_BUTTON, c4d.BFH_LEFT, 110, 5, "Add To Queue")
         self.GroupEnd()
 
-        self._treegui = self.AddCustomGui( 9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
+        self._treegui = self.AddCustomGui(9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
         if not self._treegui:
             print ("[ERROR]: Could not create TreeView")
             return False
@@ -667,6 +669,9 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_TEXT_DROPBOX, False)
         self.Enable(ID.DIALOG_DROPBOX_MAIN2, False)
 
+        self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, False)
+        self.Enable(ID.DIALOG_ADD_TO_LIST_BUTTON, False)
+
         layout = c4d.BaseContainer()
         layout.SetLong(ID_CHECKBOX, c4d.LV_CHECKBOX)
         layout.SetLong(ID_NAME, c4d.LV_TREE)
@@ -675,17 +680,17 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         self._treegui.SetLayout(4, layout)
 
-        # Set the header titles.
+        # set the header titles.
         self._treegui.SetHeaderText(ID_CHECKBOX, "Check")
         self._treegui.SetHeaderText(ID_NAME, "Name")
         self._treegui.SetHeaderText(ID_MAP_NAME, "Map")
         self._treegui.SetHeaderText(ID_MATERIAL_NAME, "Material")
         self._treegui.Refresh()
  
-        # Set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
+        # set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
         root = self._treegui.SetRoot(self._treegui, self._listView, None)
 
-        # Deletes all items in treeview if not empty
+        # deletes all items in treeview if not empty
         while len(self._listView.listOfTexture) > 0:
             tex = self._listView.listOfTexture[0]
             self._listView.listOfTexture.remove(tex)
@@ -693,8 +698,11 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         return True
 
+    # recognising the string
     def AutoAssign(self, actualName):
+        # if there is a variable set
         if actualName:
+            # check all possible map names and types
             if "AO" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
             elif "NRM" in actualName:
@@ -745,7 +753,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
             elif "SHEEN" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
-                print("Proslo SHEEN")
         else:
             print("I'm on the edge")
 
@@ -753,7 +760,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         index = indexList.index(id)
         name = nameList[index]
         return name
-    
+
+    # gets the next item in the dropbox        
     def GetNextItem(self, dropBoxId: int, fileList: list, fileNameList: list):
         actual = self.GetLong(dropBoxId)
         if actual+1 in fileList:
@@ -763,6 +771,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             actualName = fileNameList[index]
             self.AutoAssign(actualName)
 
+    # gets the previous item in the dropbox
     def GetPreviousItem(self, dropBoxId: int, fileList: list, fileNameList: list):
         actual = self.GetLong(dropBoxId)
         if actual-1 in fileList:
@@ -772,8 +781,8 @@ class ReawoteSorterDialog(gui.GeDialog):
             actualName = fileNameList[index]
             self.AutoAssign(actualName)
 
-    def Command(self, id, msg,):
 
+    def Command(self, id, msg,):
         if id == ID.DIALOG_FOLDER_BUTTON:
             path = c4d.storage.LoadDialog(title="Choose material folder", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
@@ -783,21 +792,19 @@ class ReawoteSorterDialog(gui.GeDialog):
             except: 
                 pass
             
-            # TextBox fills up with path of chosen folder
+            # textBox fills up with path of chosen folder
             self.SetString(ID.DIALOG_FOLDER_LIST, path)
 
             print(path)
-            # Saves all files in path as dir
+            # saves all files in path as dir
             dir = os.listdir(path)
-            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            # variable for first item in dir
             firstName = None
             num = 0
             ID_CHILD = 9000
             for file in dir:
                 folder_path = os.path.join(path, file)
-                # subdirs = [subdir for subdir in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, subdir))]
-                # folder_dict[file] = True
-                # Add data to our DataStructure (ListView)
                 while num <= 0:
                     firstName = file
                     num += 1
@@ -809,11 +816,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                 checkbox_list.append(file)
                 print(f"{file} checkbox byl vytvořen a přidán do listu")
                 print(folder_path)
-                #print(index)
+                print(ID_CHILD)
                 print(" ")
-                # Refresh the TreeView
+                # refresh the TreeView
                 self._treegui.Refresh()
-                print("Ze by tady?")
+
                 # for targetFolderName in targetFolders:
                 #     if targetFolderName in subdirs:
                 #         targetFolder = os.path.join(folder_path, targetFolderName)
@@ -865,10 +872,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                 #             self.SetError("One or more folders do not contain the correct Reawote material.")
                 #             print(folder, " neobsahuje spravnou slozku")
 
-                # Enables pressing the Filter materials button
-                self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
-                # Enables pressing the Select all button
-                self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
+
+            # enables pressing the Filter materials button
+            self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
+            # enables pressing the Select all button
+            self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
 
             self.Enable(ID.DIALOG_DROPBOX_BUTTON1, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN, True)
@@ -879,6 +887,8 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             self.Enable(ID.DIALOG_TEXT_DROPBOX, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN2, True)
+            self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, True)
+            self.Enable(ID.DIALOG_ADD_TO_LIST_BUTTON, True)
             
             count = len(checkbox_list)
             n = 1
@@ -887,26 +897,47 @@ class ReawoteSorterDialog(gui.GeDialog):
                 materialName = "Material " + str(n)
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idMat, materialName)
                 n+=1
-                materialIdList.append(idMat)
-                materialNameList.append(materialName)
+                material_id_list.append(idMat)
+                material_name_list.append(materialName)
                 idMat+=1
             
             idMap = 4500
-            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-            for map in mapNamesList:
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            for map in map_names_list:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
-                mapIdList.append(idMap)                
+                map_id_list.append(idMap)                
                 idMap+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
             parts = firstName.split(".")[0].split("_")
             mapID = parts[3]
             self.AutoAssign(firstName)
+
+        if id == ID.DIALOG_ADD_TO_QUEUE_BUTTON:
+            path = c4d.storage.LoadDialog(title="Choose folder to be added to TreeView", flags=c4d.FILESELECT_DIRECTORY)
+            if path == None:
+                return True
+            try:
+                path = path.decode("utf-8")
+            except:
+                pass
+
+            self.SetString(ID.DIALOG_FOLDER_LIST, path)
+            dir = os.listdir(path)
+            ID_CHILD = child_list[-1]
+            for file in dir:
+                folder_path = os.path.join(path,file)
+                ID_CHILD += 1
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
+                child_list.append(ID_CHILD)
+                child_name_list.append(file)
+                checkbox_list.append(file)
+                print(ID_CHILD)
                             
-        # Go back button <
+        # go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             self.GetPreviousItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
         
-        # Go forward button >
+        # go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
@@ -915,71 +946,79 @@ class ReawoteSorterDialog(gui.GeDialog):
         #TODO comment all sections of the code
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
-            selectedFileID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
-            selectedFileName = self.GetNameFromID(selectedFileID, child_list, child_name_list)
+            selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
+            selected_file_name = self.GetNameFromID(selected_file_id, child_list, child_name_list)
             print("")
-            print("Selected file: ", selectedFileName)
+            print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id)
             
-            mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
-            mapShortcuts = ["AO", "NRM", "DISP", "DIFF", "COL", "GLOSS","ROUGH", "METAL", "SPEC", "SSS", "SSSABSORB", "OPAC", "ANIS", "SHEEN"]
-            selectedMapID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
-            selectedMapName = self.GetNameFromID(selectedMapID, mapIdList, mapShortcuts)
-            print("Selected map: ", selectedMapName)
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
+            map_shortcuts = ["AO", "NRM", "DISP", "DIFF", "COL", "GLOSS","ROUGH", "METAL", "SPEC", "SSS", "SSSABSORB", "OPAC", "ANIS", "SHEEN"]
+            selected_map_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
+            selected_map_name = self.GetNameFromID(selected_map_id, map_id_list, map_shortcuts)
+            print("Selected map: ", selected_map_name, " and his ID: ", selected_map_id)
             
-            selectedMaterialID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN2)
-            selectedMaterialName = self.GetNameFromID(selectedMaterialID, materialIdList, materialNameList)
-            print("Selected material:", selectedMaterialName)
+            selected_material_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN2)
+            selected_material_name = self.GetNameFromID(selected_material_id, material_id_list, material_name_list)
+            print("Selected material:", selected_material_name, " and his ID: ", selected_material_id)
 
             newID = len(self._listView.listOfTexture) + 1
             print(newID)
-            tex = TextureObject(selectedFileName.format(newID),selectedMapName, selectedMaterialName)
+            tex = TextureObject(selected_file_name.format(newID),selected_map_name, selected_material_name)
             self._listView.listOfTexture.append(tex)
             self._treegui.Refresh()
             tex_list.append(tex)
 
-            selectedFiles.append(selectedFileName)
-            selectedMaterials.append(selectedMaterialName)
-            selectedMaps.append(selectedMapName)
+            selected_files.append(selected_file_name)
+            selected_materials.append(selected_material_name)
+            selected_maps.append(selected_map_name)
             
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         if id == ID.FILTER_MATERIALS_BUTTON:
-            # Goes through all checkboxes
+            # goes through all checkboxes
+            materials_upload = []
+            map_upload = []
+            assigned_material = ""
             for index, checkbox in enumerate(tex_list):
-                print("Tohle je checkbox: ", checkbox)
-                # If checkbox is selected
+                print("Tohle je checkbox v listu tex_list: ", checkbox)
+                # print("Tohle je checkbox: ", checkbox)
+                # if checkbox is selected
                 if checkbox.IsSelected:
-                    # Saves the index of selected checkbox in his default list
-                    assignedMaterial = selectedMaterials[index]
-                    # Goes through all selectedMaterials that are assigned to checboxes
-                    for index, matchingMaterial in enumerate(selectedMaterials):
-                        # If the selected material is same as the material of the selected checkbox then it also checks itself
-                        if matchingMaterial == assignedMaterial:
-                            assignedFile = tex_list[index]
-                            assignedFile.Select()
-                            self._treegui.Refresh()
-                            print(assignedFile)
+                    print("Dokonce je zaskrtly :O ", checkbox)
+                    # saves the index of selected checkbox in his default list
+                    assigned_material = selected_materials[index]
+            # goes through all selected_materials that are assigned to checkboxes
+            print(" ")
+            for index, matching_material in enumerate(selected_materials):
+                # if the selected material is same as the material of the selected checkbox then it also checks itself
+                if matching_material == assigned_material:
+                    assigned_file = tex_list[index]
+                    assigned_file.Select()
+                    self._treegui.Refresh()
+                    assigned_file_map = selected_maps[index]
+                    materials_upload.append(assigned_file_map)
+                    print("Tohle je assigned file  ", assigned_file, " a tohle je jeho mapa", assigned_file_map)
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
             select_all = True
-            # Goes through all items in tex_list
+            # goes through all items in tex_list
             for item in tex_list:
-                # If the item is not selected
+                # if the item is not selected
                 if item.IsSelected == False:
-                    # Sets the value to False
+                    # sets the value to False
                     select_all = False
-            # If all checkboxes are selected
+            # if all checkboxes are selected
             if select_all == True:
-                # Goes through all items in tex_list
+                # goes through all items in tex_list
                 for item in tex_list:
-                    # Deselect the item
+                    # deselect the item
                     item.Deselect()
             else:
-                # Otherwise it goes through all checkboxes
+                # otherwise it goes through all checkboxes
                 for item in tex_list:
-                    # And select all checkboxes
+                    # and select all checkboxes
                     item.Select()
-            # Refresh the treeview
+            # refresh the treeview
             self._treegui.Refresh()
                     
 
@@ -1134,8 +1173,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         #     c4d.EventAdd()
 
         #     return True
-
-
         
     def SetError(self, message):
         if not message:
@@ -1164,7 +1201,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         fusionShader = None
 
-        # 4K 8K atd.
+        # 4K 8K etc.
         dir = os.listdir(self.materialFolder)
         for file in dir:
             fullPath = os.path.join(self.materialFolder, file)
