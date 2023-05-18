@@ -23,7 +23,7 @@ selected_files = []
 tex_list = []
 map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 newID = 0
-path = ""
+path = " "
 
 ID_CHECKBOX = 999
 ID_NAME = 998
@@ -363,17 +363,17 @@ class ID():
 class TextureObject(object):
     texturePath = "TexPath"
     mapNameData = ""
-    materialNameData = ""
+    material_nameData = ""
     materialData = "MatData"
     mapsData = "MapData"
     _selected = False
 
-    def __init__(self, texturePath, mapNameData, materialNameData):
+    def __init__(self, texturePath, mapNameData, material_nameData):
         self.texturePath = texturePath
         self.materialData+= texturePath
         self.mapsData = texturePath
         self.mapNameData = mapNameData
-        self.materialNameData = materialNameData
+        self.material_nameData = material_nameData
         # self.selectedEntry = None
 
     @property
@@ -479,7 +479,7 @@ class ListView(c4d.gui.TreeViewFunctions):
             drawinfo["frame"].DrawText(name, xpos, ypos - h * 1.1)
 
         if col == ID_MATERIAL_NAME:
-            name = obj.materialNameData
+            name = obj.material_nameData
             geUserArea = drawinfo["frame"]
             w = geUserArea.DrawGetTextWidth(name)
             h = geUserArea.DrawGetFontHeight()
@@ -548,7 +548,8 @@ class ReawoteSorterDialog(gui.GeDialog):
     hasDisp = False
     hasAO = False
     hasIor = False
-    materialFolder = None
+    materialFolder = None   
+    path = ""
 
     _treegui = None
     _listView = ListView()
@@ -593,12 +594,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
 
-        # cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
-        # cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
-        # cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
-        # cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
-        # bLoad = self.AddButton(ID.DIALOG_LOAD_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Load material")
-        # strErr = self.AddStaticText(ID.DIALOG_ERROR, c4d.BFH_SCALEFIT, 64, 10, "", 0)
+
         
         customgui = c4d.BaseContainer()
         customgui.SetBool(c4d.TREEVIEW_BORDER, c4d.BORDER_THIN_IN)
@@ -614,6 +610,11 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
         self.AddButton(ID.FILTER_MATERIALS_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
 
+        cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
+        cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
+        cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
+        cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
+        
         self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 2, 1, "Mini Buttons", 0, 10, 10)
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
         self.AddButton(ID.DIALOG_ADD_TO_QUEUE_BUTTON, c4d.BFH_LEFT, 110, 5, "Add To Queue")
@@ -699,87 +700,87 @@ class ReawoteSorterDialog(gui.GeDialog):
         return True
 
     # recognising the string
-    def AutoAssign(self, actualName):
+    def auto_assign(self, actual_name):
         # if there is a variable set
-        if actualName:
+        if actual_name:
             # check all possible map names and types
-            if "AO" in actualName:
+            if "AO" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
-            elif "NRM" in actualName:
+            elif "NRM" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-            elif "NRM16" in actualName:
+            elif "NRM16" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-            elif "Normal" in actualName:
+            elif "Normal" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-            elif "normal" in actualName:
+            elif "normal" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-            elif "DISP" in actualName:
+            elif "DISP" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
-            elif "Displacement" in actualName:
+            elif "Displacement" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
-            elif "DISP16" in actualName:
+            elif "DISP16" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
-            elif "DIFF" in actualName:
+            elif "DIFF" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "diff" in actualName:
+            elif "diff" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "diffuse" in actualName:
+            elif "diffuse" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "COL" in actualName:
+            elif "COL" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
-            elif "COLOR" in actualName:
+            elif "COLOR" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
-            elif "GLOSS" in actualName:
+            elif "GLOSS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
-            elif "Glosiness" in actualName:
+            elif "Glosiness" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
-            elif "ROUGH" in actualName:
+            elif "ROUGH" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
-            elif "METAL" in actualName:
+            elif "METAL" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
-            elif "SPEC" in actualName:
+            elif "SPEC" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "Specular" in actualName:
+            elif "Specular" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "spec" in actualName:
+            elif "spec" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "SPECLVL" in actualName:
+            elif "SPECLVL" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "SSSABSORB_SSS" in actualName:
+            elif "SSSABSORB_SSS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
-            elif "OPAC" in actualName:
+            elif "OPAC" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4510)
-            elif "ANIS" in actualName:
+            elif "ANIS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
-            elif "SHEEN" in actualName:
+            elif "SHEEN" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
         else:
             print("I'm on the edge")
 
-    def GetNameFromID(self, id: int, indexList: list, nameList: list):
-        index = indexList.index(id)
-        name = nameList[index]
+    def get_name_from_id(self, id: int, index_list: list, name_list: list):
+        index = index_list.index(id)
+        name = name_list[index]
         return name
 
     # gets the next item in the dropbox        
-    def GetNextItem(self, dropBoxId: int, fileList: list, fileNameList: list):
-        actual = self.GetLong(dropBoxId)
-        if actual+1 in fileList:
+    def get_next_item(self, dropbox_id: int, file_list: list, file_name_list: list):
+        actual = self.GetLong(dropbox_id)
+        if actual+1 in file_list:
             next = actual+1
-            self.SetInt32(dropBoxId, next)
-            index = fileList.index(next)
-            actualName = fileNameList[index]
-            self.AutoAssign(actualName)
+            self.SetInt32(dropbox_id, next)
+            index = file_list.index(next)
+            actual_name = file_name_list[index]
+            self.auto_assign(actual_name)
 
     # gets the previous item in the dropbox
-    def GetPreviousItem(self, dropBoxId: int, fileList: list, fileNameList: list):
-        actual = self.GetLong(dropBoxId)
-        if actual-1 in fileList:
+    def get_previous_item(self, dropbox_id: int, file_list: list, file_name_list: list):
+        actual = self.GetLong(dropbox_id)
+        if actual-1 in file_list:
             previous = actual-1
-            self.SetInt32(dropBoxId, previous)
-            index = fileList.index(previous)
-            actualName = fileNameList[index]
-            self.AutoAssign(actualName)
+            self.SetInt32(dropbox_id, previous)
+            index = file_list.index(previous)
+            actual_name = file_name_list[index]
+            self.auto_assign(actual_name)
 
 
     def Command(self, id, msg,):
@@ -800,19 +801,19 @@ class ReawoteSorterDialog(gui.GeDialog):
             dir = os.listdir(path)
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             # variable for first item in dir
-            firstName = None
+            first_name = None
             num = 0
             ID_CHILD = 9000
             for file in dir:
                 folder_path = os.path.join(path, file)
                 while num <= 0:
-                    firstName = file
+                    first_name = file
                     num += 1
                 ID_CHILD += 1
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
                 child_list.append(ID_CHILD)
                 child_name_list.append(file)
-                print(firstName)
+                print(first_name)
                 checkbox_list.append(file)
                 print(f"{file} checkbox byl vytvořen a přidán do listu")
                 print(folder_path)
@@ -892,25 +893,25 @@ class ReawoteSorterDialog(gui.GeDialog):
             
             count = len(checkbox_list)
             n = 1
-            idMat = 4000
+            id_mat = 4000
             while count >= n:
-                materialName = "Material " + str(n)
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, idMat, materialName)
+                material_name = "Material " + str(n)
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN2, id_mat, material_name)
                 n+=1
-                material_id_list.append(idMat)
-                material_name_list.append(materialName)
-                idMat+=1
+                material_id_list.append(id_mat)
+                material_name_list.append(material_name)
+                id_mat+=1
             
-            idMap = 4500
+            id_map = 4500
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             for map in map_names_list:
-                self.AddChild(ID.DIALOG_DROPBOX_MAIN3, idMap, map)
-                map_id_list.append(idMap)                
-                idMap+=1
+                self.AddChild(ID.DIALOG_DROPBOX_MAIN3, id_map, map)
+                map_id_list.append(id_map)                
+                id_map+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
-            parts = firstName.split(".")[0].split("_")
+            parts = first_name.split(".")[0].split("_")
             mapID = parts[3]
-            self.AutoAssign(firstName)
+            self.auto_assign(first_name)
 
         if id == ID.DIALOG_ADD_TO_QUEUE_BUTTON:
             path = c4d.storage.LoadDialog(title="Choose folder to be added to TreeView", flags=c4d.FILESELECT_DIRECTORY)
@@ -935,11 +936,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                             
         # go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
-            self.GetPreviousItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
         
         # go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
-            self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
 
@@ -947,18 +948,18 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
-            selected_file_name = self.GetNameFromID(selected_file_id, child_list, child_name_list)
+            selected_file_name = self.get_name_from_id(selected_file_id, child_list, child_name_list)
             print("")
             print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id)
             
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
             map_shortcuts = ["AO", "NRM", "DISP", "DIFF", "COL", "GLOSS","ROUGH", "METAL", "SPEC", "SSS", "SSSABSORB", "OPAC", "ANIS", "SHEEN"]
             selected_map_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
-            selected_map_name = self.GetNameFromID(selected_map_id, map_id_list, map_shortcuts)
+            selected_map_name = self.get_name_from_id(selected_map_id, map_id_list, map_shortcuts)
             print("Selected map: ", selected_map_name, " and his ID: ", selected_map_id)
             
             selected_material_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN2)
-            selected_material_name = self.GetNameFromID(selected_material_id, material_id_list, material_name_list)
+            selected_material_name = self.get_name_from_id(selected_material_id, material_id_list, material_name_list)
             print("Selected material:", selected_material_name, " and his ID: ", selected_material_id)
 
             newID = len(self._listView.listOfTexture) + 1
@@ -972,7 +973,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_materials.append(selected_material_name)
             selected_maps.append(selected_map_name)
             
-            self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         if id == ID.FILTER_MATERIALS_BUTTON:
             # goes through all checkboxes
@@ -990,7 +991,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             # goes through all selected_materials that are assigned to checkboxes
             print(" ")
             for index, matching_material in enumerate(selected_materials):
-                # if the selected material is same as the material of the selected checkbox then it also checks itself
+                # if the material number is same as the material of the selected checkbox then it also checks itself
                 if matching_material == assigned_material:
                     assigned_file = tex_list[index]
                     assigned_file.Select()
@@ -998,6 +999,126 @@ class ReawoteSorterDialog(gui.GeDialog):
                     assigned_file_map = selected_maps[index]
                     materials_upload.append(assigned_file_map)
                     print("Tohle je assigned file  ", assigned_file, " a tohle je jeho mapa", assigned_file_map)
+
+            # print("Tohle je mapID pro vybrane materialy", mapID)
+            folderToPath = self.GetString(ID.DIALOG_FOLDER_LIST)
+            hasColor = False
+            # if targetFolder is not None:
+            loadAO = self.GetBool(ID.DIALOG_MAP_AO_CB)
+            loadDispl = self.GetBool(ID.DIALOG_MAP_DISPL_CB)
+            load16bdispl = self.GetBool(ID.DIALOG_MAP_16B_DISPL_CB)
+            # loadIor = self.GetBool(ID.DIALOG_MAP_IOR_CB
+            mat = c4d.BaseMaterial(ID.CORONA_STR_MATERIAL_PHYSICAL)
+            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
+            mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
+            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
+            fusionShader = None
+            # dir = os.listdir(targetFolder)
+            # for file in dir:
+            for mapID in materials_upload:
+                print(mapID)
+                fullPath = os.path.join(folderToPath, mapID)
+                # print("Type of fullpath: ", type(fullPath))
+                if mapID == "COL" or mapID == "COLOR":
+                    mat.SetName("Materialek")
+                    if not loadAO:
+                        bitmap = c4d.BaseShader(c4d.Xbitmap)
+                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                        mat.InsertShader(bitmap)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                    else:
+                        if not fusionShader:
+                            fusionShader = c4d.BaseShader(c4d.Xfusion)
+                            fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+                            fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(fusionShader)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
+                        bitmap = c4d.BaseShader(c4d.Xbitmap)
+                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                        fusionShader.InsertShader(bitmap)
+                        fusionShader.SetParameter(c4d.SLA_FUSION_BASE_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "NRM":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    texture = c4d.BaseShader(ID.PLUGINID_CORONA4D_NORMALSHADER)
+                    texture.SetParameter(ID.CORONA_NORMALMAP_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                    texture.SetParameter(ID.CORONA_NORMALMAP_FLIP_G, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.InsertShader(texture)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, texture, c4d.DESCFLAGS_SET_NONE)
+                elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MIN_LEVEL, 0, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
+                elif loadAO and mapID == "AO":
+                    if not fusionShader:
+                        fusionShader = c4d.BaseShader(c4d.Xfusion)
+                        fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+                        fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+                        mat.InsertShader(fusionShader)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    fusionShader.InsertShader(bitmap)
+                    fusionShader.SetParameter(c4d.SLA_FUSION_BLEND_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "OPAC":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "GLOSS":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "REFL":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_MATERIAL_REFLECT, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_REFLECT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "SSS":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_SSS, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_VOLUME_SSS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "SSSABSORB":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_MATERIAL_VOLUME, True, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_VOLUME_ABSORPTION_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                # elif loadIor and mapID == "IOR":
+                #     bitmap = c4d.BaseShader(c4d.Xbitmap)
+                #     bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                #     mat.InsertShader(bitmap)
+                #     mat.SetParameter(ID.CORONA_REFLECT_FRESNELLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                elif mapID == "METAL":
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                    mat.InsertShader(bitmap)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                doc = c4d.documents.GetActiveDocument()
+                doc.StartUndo()
+                # nevim proc to je bile, ale funguje to takze save
+                doc.InsertMaterial(mat)
+                # print("uz to proslo Insertem")
+                doc.AddUndo(c4d.UNDOTYPE_NEW, mat)
+                doc.EndUndo()
+                material_to_add.append(mat)                                   
+                self.SetString(ID.DIALOG_ERROR, "")
+            c4d.EventAdd()
+
+
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
             select_all = True
