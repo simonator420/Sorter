@@ -64,7 +64,7 @@ class ID():
     FILTER_MATERIALS_BUTTON = 100017
     DIALOG_ADD_TO_LIST_BUTTON = 100030
     DIALOG_LIST_CHECKBOX = 100013
-    DIALOG_SELECT_ALL_BUTTON = 100018
+    
 
     DIALOG_MAP_AO_CB = 100003
     DIALOG_MAP_DISPL_CB = 100004
@@ -86,6 +86,10 @@ class ID():
     DIALOG_GROUP3_DOPBOXES = 100027
     DIALOG_TEXT_DROPBOX = 100028
     DIALOG_DROPBOX_MAIN3 = 100026
+
+    DIALOG_GROUP_MINI_BUTTONS = 100031
+    DIALOG_SELECT_ALL_BUTTON = 100018
+    DIALOG_ADD_TO_QUEUE_BUTTON = 100032
 
     # Todo: generate this with swig
     PLUGINID_CORONA4D_MATERIAL = 1032100
@@ -607,7 +611,11 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
         self.AddButton(ID.FILTER_MATERIALS_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+
+        self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 2, 1, "Mini Buttons", 0, 10, 10)
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
+        self.AddButton(ID.DIALOG_ADD_TO_QUEUE_BUTTON, c4d.BFH_LEFT, 110, 5, "Add To Queue")
+        self.GroupEnd()
 
         self._treegui = self.AddCustomGui( 9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
         if not self._treegui:
@@ -677,10 +685,14 @@ class ReawoteSorterDialog(gui.GeDialog):
         # Set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
         root = self._treegui.SetRoot(self._treegui, self._listView, None)
 
-        
+        # Deletes all items in treeview if not empty
+        while len(self._listView.listOfTexture) > 0:
+            tex = self._listView.listOfTexture[0]
+            self._listView.listOfTexture.remove(tex)
+        self._treegui.Refresh()
+
         return True
 
-    # TODO GetInt32 instead
     def AutoAssign(self, actualName):
         if actualName:
             if "AO" in actualName:
@@ -767,16 +779,15 @@ class ReawoteSorterDialog(gui.GeDialog):
             if path == None:
                 return True
             try:
-                #python2
                 path = path.decode("utf-8")
             except: 
                 pass
             
-            # TextBox se vyplni cestou do vybrane slozky
+            # TextBox fills up with path of chosen folder
             self.SetString(ID.DIALOG_FOLDER_LIST, path)
 
             print(path)
-            # ulozeni vsech souboru a slozek v ceste do slozky
+            # Saves all files in path as dir
             dir = os.listdir(path)
             mapNamesList = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             firstName = None
@@ -854,9 +865,9 @@ class ReawoteSorterDialog(gui.GeDialog):
                 #             self.SetError("One or more folders do not contain the correct Reawote material.")
                 #             print(folder, " neobsahuje spravnou slozku")
 
-                # povoli se klikani na Load Selected Materials
+                # Enables pressing the Filter materials button
                 self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
-                # povoli se klikani na Select All
+                # Enables pressing the Select all button
                 self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
 
             self.Enable(ID.DIALOG_DROPBOX_BUTTON1, True)
@@ -890,18 +901,18 @@ class ReawoteSorterDialog(gui.GeDialog):
             parts = firstName.split(".")[0].split("_")
             mapID = parts[3]
             self.AutoAssign(firstName)
-                    
-        active_checkbox_list = []
-        
-        # šipka zpět <
+                            
+        # Go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             self.GetPreviousItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
         
-        # šipka dopředu >
+        # Go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
+
+        #TODO comment all sections of the code
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
             selectedFileID = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
@@ -933,16 +944,16 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.GetNextItem(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         if id == ID.FILTER_MATERIALS_BUTTON:
-            # projde vsechny checkboxy
+            # Goes through all checkboxes
             for index, checkbox in enumerate(tex_list):
                 print("Tohle je checkbox: ", checkbox)
-                # pokud je checkbox zaskrtnut
+                # If checkbox is selected
                 if checkbox.IsSelected:
-                    # ulozi se index zaskrtnuteho checkboxu v jeho puvodnim listu vybranych materialu jako assignedMaterial
+                    # Saves the index of selected checkbox in his default list
                     assignedMaterial = selectedMaterials[index]
-                    # projde vsechny vybrane materialy ktere jsou prirazeny k checkboxum
+                    # Goes through all selectedMaterials that are assigned to checboxes
                     for index, matchingMaterial in enumerate(selectedMaterials):
-                        # pokud je vybrany material stejny jako material zaskrtnuteho checkboxu tak se jeho checkbox taky zaskrtne
+                        # If the selected material is same as the material of the selected checkbox then it also checks itself
                         if matchingMaterial == assignedMaterial:
                             assignedFile = tex_list[index]
                             assignedFile.Select()
@@ -951,15 +962,24 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
             select_all = True
+            # Goes through all items in tex_list
             for item in tex_list:
+                # If the item is not selected
                 if item.IsSelected == False:
+                    # Sets the value to False
                     select_all = False
+            # If all checkboxes are selected
             if select_all == True:
+                # Goes through all items in tex_list
                 for item in tex_list:
+                    # Deselect the item
                     item.Deselect()
             else:
+                # Otherwise it goes through all checkboxes
                 for item in tex_list:
+                    # And select all checkboxes
                     item.Select()
+            # Refresh the treeview
             self._treegui.Refresh()
                     
 
