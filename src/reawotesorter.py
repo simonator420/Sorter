@@ -689,11 +689,21 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
             elif "NRM16" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+            elif "Normal" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+            elif "normal" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
             elif "DISP" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif "Displacement" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "DISP16" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "DIFF" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "diff" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "diffuse" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "COL" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
@@ -701,11 +711,17 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "GLOSS" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+            elif "Glosiness" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
             elif "ROUGH" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
             elif "METAL" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
             elif "SPEC" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
+            elif "Specular" in actualName:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
+            elif "spec" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
             elif "SPECLVL" in actualName:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
