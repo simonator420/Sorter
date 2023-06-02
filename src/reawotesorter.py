@@ -20,7 +20,9 @@ material_name_list = []
 selected_materials = []
 selected_maps = []
 selected_files = []
+selected_paths = []
 tex_list = []
+folder_path_list = []
 map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 newID = 0
 path = " "
@@ -781,7 +783,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 print(folder_path)
                 print(ID_CHILD)
                 print(" ")
-                # refresh the TreeView
+                folder_path_list.append(folder_path)
                 self._treegui.Refresh()
 
                 # for targetFolderName in targetFolders:
@@ -912,8 +914,9 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
             selected_file_name = self.get_name_from_id(selected_file_id, child_list, child_name_list)
             print("")
-            print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id)
-            
+            selected_file_path = self.get_name_from_id(selected_file_id,child_list, folder_path_list)
+            print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id, " and his path: ", selected_file_path)
+
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
             map_shortcuts = ["AO", "NRM", "DISP", "DIFF", "COL", "GLOSS","ROUGH", "METAL", "SPEC", "SSS", "SSSABSORB", "OPAC", "ANIS", "SHEEN"]
             selected_map_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
@@ -934,13 +937,17 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_files.append(selected_file_name)
             selected_materials.append(selected_material_name)
             selected_maps.append(selected_map_name)
+            selected_paths.append(selected_file_path)
             
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+
+            
 
         if id == ID.FILTER_MATERIALS_BUTTON:
             # goes through all checkboxes
             materials_upload = []
-            map_upload = []
+            paths_upload = []
+            name_upload = []
             assigned_material = ""
             for index, checkbox in enumerate(tex_list):
                 print("Tohle je checkbox v listu tex_list: ", checkbox)
@@ -959,11 +966,15 @@ class ReawoteSorterDialog(gui.GeDialog):
                     assigned_file.Select()
                     self._treegui.Refresh()
                     assigned_file_map = selected_maps[index]
+                    assigned_path = selected_paths[index]
+                    assigned_name = selected_materials[index]
                     materials_upload.append(assigned_file_map)
-                    print("Tohle je assigned file  ", assigned_file, " a tohle je jeho mapa", assigned_file_map)
+                    paths_upload.append(assigned_path)
+                    name_upload.append(assigned_name)
+                    print("Tohle je assigned file  ", assigned_file, " a tohle je jeho mapa ", assigned_file_map, " a tohle je cesta k souboru ", assigned_path)
 
             # print("Tohle je mapID pro vybrane materialy", mapID)
-            folderToPath = self.GetString(ID.DIALOG_FOLDER_LIST)
+            folder_path = self.GetString(ID.DIALOG_FOLDER_LIST)
             hasColor = False
             # if targetFolder is not None:
             loadAO = self.GetBool(ID.DIALOG_MAP_AO_CB)
@@ -979,10 +990,13 @@ class ReawoteSorterDialog(gui.GeDialog):
             # for file in dir:
             for mapID in materials_upload:
                 print(mapID)
-                fullPath = os.path.join(folderToPath, mapID)
-                # print("Type of fullpath: ", type(fullPath))
+                print(folder_path)
+                index = materials_upload.index(mapID)
+                fullPath = paths_upload[index]
+                mat_name = name_upload[index]
+                print(fullPath)
                 if mapID == "COL" or mapID == "COLOR":
-                    mat.SetName("Materialek")
+                    mat.SetName(mat_name)
                     if not loadAO:
                         bitmap = c4d.BaseShader(c4d.Xbitmap)
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
