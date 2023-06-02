@@ -58,7 +58,6 @@ class ID():
     DIALOG_FOLDER_BUTTON = 100002
     # TODO zde pridat textove pole se slozkama
 
-
     DIALOG_MAIN_GROUP = 100014
     DIALOG_SCROLL_GROUP = 100012
     DIALOG_SCROLL_GROUP_TWO = 100016
@@ -68,7 +67,6 @@ class ID():
     DIALOG_ADD_TO_LIST_BUTTON = 100030
     DIALOG_LIST_CHECKBOX = 100013
     
-
     DIALOG_MAP_AO_CB = 100003
     DIALOG_MAP_DISPL_CB = 100004
     DIALOG_MAP_16B_DISPL_CB = 100005
@@ -93,6 +91,7 @@ class ID():
     DIALOG_GROUP_MINI_BUTTONS = 100031
     DIALOG_SELECT_ALL_BUTTON = 100018
     DIALOG_ADD_TO_QUEUE_BUTTON = 100032
+    DIALOG_DELETE_BUTTON = 100033
 
     ID_CHILD = 9000
 
@@ -579,9 +578,10 @@ class ReawoteSorterDialog(gui.GeDialog):
         cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
         cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
         
-        self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 2, 1, "Mini Buttons", 0, 10, 10)
+        self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 3, 1, "Mini Buttons", 0, 10, 10)
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
         self.AddButton(ID.DIALOG_ADD_TO_QUEUE_BUTTON, c4d.BFH_LEFT, 110, 5, "Add To Queue")
+        self.AddButton(ID.DIALOG_DELETE_BUTTON, c4d.BFH_LEFT, 50, 5, "Delete")
         self.GroupEnd()
 
         self._treegui = self.AddCustomGui(9300, c4d.CUSTOMGUI_TREEVIEW, "", c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, 300, 300, customgui)
@@ -661,6 +661,62 @@ class ReawoteSorterDialog(gui.GeDialog):
             self._listView.listOfTexture.remove(tex)
         self._treegui.Refresh()
 
+        while len(checkbox_list) > 0:
+            for item in checkbox_list:
+                checkbox_list.remove(item)
+        
+        while len(material_to_add) > 0:
+            for item in material_to_add:
+                material_to_add.remove(item)
+
+        while len(same_path_dirs) > 0:
+            for item in same_path_dirs:
+                same_path_dirs.remove(item)
+
+        while len(materialCount) > 0:
+            for item in materialCount:
+                materialCount.remove(item)
+
+        while len(child_list) > 0:
+            for item in child_list:
+                child_list.remove(item)
+        
+        while len(child_name_list) > 0:
+            for item in child_name_list:
+                child_name_list.remove(item)
+
+        while len(map_id_list) > 0:
+            for item in map_id_list:
+                map_id_list.remove(item)
+
+        while len(material_id_list) > 0:
+            for item in material_id_list:
+                material_id_list.remove(item)
+
+        while len(material_name_list) > 0:
+            for item in material_name_list:
+                material_name_list.remove(item)
+        
+        while len(selected_materials) > 0:
+            for item in selected_materials:
+                selected_materials.remove(item)
+
+        while len(selected_files) > 0:
+            for item in selected_files:
+                selected_files.remove(item)
+        
+        while len(selected_paths) > 0:
+            for item in selected_paths:
+                selected_paths.remove(item)
+        
+        while len(tex_list) > 0:
+            for item in tex_list:
+                tex_list.remove(item)
+
+        while len(folder_path_list) > 0:
+            for item in folder_path_list:
+                folder_path_list.remove(item)
+
         return True
 
     # recognising the string
@@ -702,6 +758,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
             elif "METAL" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+            elif "OPAC" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
             elif "SPEC" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
             elif "Specular" in actual_name:
@@ -712,8 +770,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
             elif "SSSABSORB_SSS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
-            elif "OPAC" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4510)
             elif "ANIS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
             elif "SHEEN" in actual_name:
@@ -749,6 +805,21 @@ class ReawoteSorterDialog(gui.GeDialog):
 
     def Command(self, id, msg,):
         if id == ID.DIALOG_FOLDER_BUTTON:
+            print(checkbox_list)
+            print(material_to_add)
+            print(same_path_dirs)
+            print(materialCount)
+            print(child_list)
+            print(child_name_list)
+            print(map_id_list)
+            print(material_id_list)
+            print(material_name_list)
+            print(selected_materials)
+            print(selected_maps)
+            print(selected_files)
+            print(selected_paths)
+            print(tex_list)
+            print(folder_path_list)
             path = c4d.storage.LoadDialog(title="Choose material folder", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
                 return True
@@ -897,6 +968,13 @@ class ReawoteSorterDialog(gui.GeDialog):
                 child_name_list.append(file)
                 checkbox_list.append(file)
                 print(ID_CHILD)
+                folder_path_list.append(folder_path)
+
+        if id == ID.DIALOG_DELETE_BUTTON:
+            for checkbox in self._listView.listOfTexture:
+                if checkbox.IsSelected:
+                    self._listView.listOfTexture.remove(checkbox)
+            self._treegui.Refresh()
                             
         # go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
@@ -940,8 +1018,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_paths.append(selected_file_path)
             
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
-
-            
 
         if id == ID.FILTER_MATERIALS_BUTTON:
             # goes through all checkboxes
