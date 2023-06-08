@@ -1006,18 +1006,24 @@ class ReawoteSorterDialog(gui.GeDialog):
             materials_upload = []
             paths_upload = []
             assigned_material = ""
+            set_of_materials_to_load = []
             # goes through all checkboxes
             for index, checkbox in enumerate(tex_list):
                 print("Tohle je checkbox v listu tex_list: ", checkbox)
                 # if the checkbox is checked
                 if checkbox.IsSelected:
                     print("Checked checkbox: ", checkbox)
-                    # saves the name of the material of the selected checkbox in selected_materials list e.g. Material 2
+                    # saves the name of the material that is assigned to the checkbox in selected_materials list e.g. Material 2
                     assigned_material = selected_materials[index]
+                    set_of_materials_to_load.append(assigned_material)
             print(" ")
             # goes through all selected_materials that are assigned to checkboxes
             print("Assigned materiaaaaaaal: ", assigned_material)
+            print(" ")
             print("Selected materiaaaaaaals: ", selected_materials)
+            print("Selected fileeeeeeeeeees: ", selected_files)
+            print("Selected maaaaaaaaaaaaps: ", selected_maps)
+            print(" ")
             # selected_materials = vsechny materialy stejne napr. Material 5, Material 5, ...
             # selected_materials a assigned_material by mely byt vzdy stejne
             for index, matching_material in enumerate(selected_materials):
@@ -1028,13 +1034,13 @@ class ReawoteSorterDialog(gui.GeDialog):
                     assigned_file.Select()
                     self._treegui.Refresh()
                     # saves the map that was selected in the combobox e.g. NRM
-                    assigned_file_map = selected_maps[index]
+                    mapID = selected_maps[index]
                     # saves the path of the assigned_file
                     assigned_path = selected_paths[index]
                     # appends the material with the path to lists that are going to be used for uploading final material
-                    materials_upload.append(assigned_file_map)
+                    materials_upload.append(mapID)
                     paths_upload.append(assigned_path)
-                    print("Tohle je assigned file ", assigned_file, " a tohle je jeho mapa ", assigned_file_map, " a tohle je cesta k souboru ", assigned_path)
+                    print("Tohle je assigned file ", assigned_file, " a tohle je jeho mapa ", mapID, " a tohle je cesta k souboru ", assigned_path)
 
             # saves the folder path of the default folder
             folder_path = self.GetString(ID.DIALOG_FOLDER_LIST)
@@ -1048,13 +1054,24 @@ class ReawoteSorterDialog(gui.GeDialog):
             mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
             fusionShader = None
-            print("Materials upload: ", materials_upload)
+            print("Materials upload: ", materials_upload, " for this material: ", assigned_material)
+            print("")
+            print("Tyhle materialy se ted budou loadovat: ", set_of_materials_to_load)
+            # goes through maps of selected materials
+
+            # TODO loading of more materials at the same time
+            for item in set_of_materials_to_load:
+                for matching in selected_materials:
+                    if item == matching:
+                        print("pico tak tohle jestli funguje xd ", item, matching)
             for mapID in materials_upload:
                 print(mapID)
                 print(folder_path)
                 index = materials_upload.index(mapID)
+                # gets the path of the actual file through its index
                 fullPath = paths_upload[index]
                 print(fullPath)
+                # sets the name of the final material same as the material that is attached to the file e.g. Material 2
                 mat.SetName(assigned_material)
                 if mapID == "COL" or mapID == "COLOR":
                     if not loadAO:
@@ -1151,7 +1168,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 material_to_add.append(mat)                                   
                 self.SetString(ID.DIALOG_ERROR, "")
                 for index, checkbox in enumerate(tex_list):
-                    print("Tohle je checkbox v listu tex_list: ", checkbox)
+                    # print("Tohle je checkbox v listu tex_list: ", checkbox)
                     # if the checkbox is checked
                     if checkbox.IsSelected:
                         checkbox.Deselect()
