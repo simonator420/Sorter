@@ -573,10 +573,10 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
         self.AddButton(ID.FILTER_MATERIALS_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
 
-        # cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
-        # cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
-        # cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
-        # cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
+        cbAO = self.AddCheckbox(ID.DIALOG_MAP_AO_CB, c4d.BFH_SCALEFIT, 1, 1, "Include ambient occlusion (AO) maps")
+        cbDispl = self.AddCheckbox(ID.DIALOG_MAP_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Include displacement maps")
+        cb16bdispl = self.AddCheckbox(ID.DIALOG_MAP_16B_DISPL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit displacement maps (when available)")
+        cb16bnormal = self.AddCheckbox(ID.DIALOG_MAP_16B_NORMAL_CB, c4d.BFH_SCALEFIT, 1, 1, "Use 16 bit normal maps (when available)")
         
         self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 3, 1, "Mini Buttons", 0, 10, 10)
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
@@ -719,7 +719,6 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         return True
 
-    # recognising the string
     def auto_assign(self, actual_name):
         # if there is a variable set
         if actual_name:
@@ -893,7 +892,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 #             self.SetError("One or more folders do not contain the correct Reawote material.")
                 #             print(folder, " neobsahuje spravnou slozku")
 
-
             # enables pressing the Filter materials button
             self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
             # enables pressing the Select all button
@@ -911,10 +909,10 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, True)
             self.Enable(ID.DIALOG_ADD_TO_LIST_BUTTON, True)
             
-            count = len(checkbox_list)
+            # count = len(checkbox_list)
             n = 1
             id_mat = 4000
-            while count >= n:
+            while 40 >= n:
                 material_name = "Material " + str(n)
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN2, id_mat, material_name)
                 n+=1
@@ -1005,37 +1003,42 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         if id == ID.FILTER_MATERIALS_BUTTON:
-            # goes through all checkboxes
             materials_upload = []
             paths_upload = []
-            name_upload = []
             assigned_material = ""
+            # goes through all checkboxes
             for index, checkbox in enumerate(tex_list):
                 print("Tohle je checkbox v listu tex_list: ", checkbox)
+                # if the checkbox is checked
                 if checkbox.IsSelected:
-                    print("Dokonce je zaskrtly :O ", checkbox)
-                    # saves the index of selected checkbox in his default list
+                    print("Checked checkbox: ", checkbox)
+                    # saves the name of the material of the selected checkbox in selected_materials list e.g. Material 2
                     assigned_material = selected_materials[index]
-            # goes through all selected_materials that are assigned to checkboxes
             print(" ")
+            # goes through all selected_materials that are assigned to checkboxes
+            print("Assigned materiaaaaaaal: ", assigned_material)
+            print("Selected materiaaaaaaals: ", selected_materials)
+            # selected_materials = vsechny materialy stejne napr. Material 5, Material 5, ...
+            # selected_materials a assigned_material by mely byt vzdy stejne
             for index, matching_material in enumerate(selected_materials):
                 # if the material number is same as the material of the selected checkbox then it also checks itself
                 if matching_material == assigned_material:
+                    # saves the name of the file on the same index e.g. image_nrm.jpg
                     assigned_file = tex_list[index]
                     assigned_file.Select()
                     self._treegui.Refresh()
+                    # saves the map that was selected in the combobox e.g. NRM
                     assigned_file_map = selected_maps[index]
+                    # saves the path of the assigned_file
                     assigned_path = selected_paths[index]
-                    assigned_name = selected_materials[index]
+                    # appends the material with the path to lists that are going to be used for uploading final material
                     materials_upload.append(assigned_file_map)
                     paths_upload.append(assigned_path)
-                    name_upload.append(assigned_name)
-                    print("Tohle je assigned file  ", assigned_file, " a tohle je jeho mapa ", assigned_file_map, " a tohle je cesta k souboru ", assigned_path)
+                    print("Tohle je assigned file ", assigned_file, " a tohle je jeho mapa ", assigned_file_map, " a tohle je cesta k souboru ", assigned_path)
 
-            # print("Tohle je mapID pro vybrane materialy", mapID)
+            # saves the folder path of the default folder
             folder_path = self.GetString(ID.DIALOG_FOLDER_LIST)
             hasColor = False
-            # if targetFolder is not None:
             loadAO = self.GetBool(ID.DIALOG_MAP_AO_CB)
             loadDispl = self.GetBool(ID.DIALOG_MAP_DISPL_CB)
             load16bdispl = self.GetBool(ID.DIALOG_MAP_16B_DISPL_CB)
@@ -1045,17 +1048,15 @@ class ReawoteSorterDialog(gui.GeDialog):
             mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
             fusionShader = None
-            # dir = os.listdir(targetFolder)
-            # for file in dir:
+            print("Materials upload: ", materials_upload)
             for mapID in materials_upload:
                 print(mapID)
                 print(folder_path)
                 index = materials_upload.index(mapID)
                 fullPath = paths_upload[index]
-                mat_name = name_upload[index]
                 print(fullPath)
+                mat.SetName(assigned_material)
                 if mapID == "COL" or mapID == "COLOR":
-                    mat.SetName(mat_name)
                     if not loadAO:
                         bitmap = c4d.BaseShader(c4d.Xbitmap)
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
@@ -1144,13 +1145,16 @@ class ReawoteSorterDialog(gui.GeDialog):
                     mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                 doc = c4d.documents.GetActiveDocument()
                 doc.StartUndo()
-                # nevim proc to je bile, ale funguje to takze save
                 doc.InsertMaterial(mat)
-                # print("uz to proslo Insertem")
                 doc.AddUndo(c4d.UNDOTYPE_NEW, mat)
                 doc.EndUndo()
                 material_to_add.append(mat)                                   
                 self.SetString(ID.DIALOG_ERROR, "")
+                for index, checkbox in enumerate(tex_list):
+                    print("Tohle je checkbox v listu tex_list: ", checkbox)
+                    # if the checkbox is checked
+                    if checkbox.IsSelected:
+                        checkbox.Deselect()
             c4d.EventAdd()
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
