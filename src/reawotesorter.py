@@ -1056,14 +1056,128 @@ class ReawoteSorterDialog(gui.GeDialog):
             fusionShader = None
             print("Materials upload: ", materials_upload, " for this material: ", assigned_material)
             print("")
-            print("Tyhle materialy se ted budou loadovat: ", set_of_materials_to_load)
+            print("Tyhle materialy se ted budou loadovat: ", set(set_of_materials_to_load))
             # goes through maps of selected materials
 
             # TODO loading of more materials at the same time
-            for item in set_of_materials_to_load:
-                for matching in selected_materials:
-                    if item == matching:
-                        print("pico tak tohle jestli funguje xd ", item, matching)
+            # for item in set(set_of_materials_to_load):
+            #     for index, matching in enumerate(selected_materials):
+            #         print("Matching: ", matching)
+            #         # if item == matching:
+            #             # print(" tak tohle jestli funguje xd ", item, matching)
+
+            # for index, item in enumerate(selected_materials):
+            #     if item in set(set_of_materials_to_load):
+            #         print("Tohle je item: ", item)
+            #         print("A tohle je jeho index: ", index)
+            #         mapID = selected_maps[index]
+            #         print("Tohle je mapa: ", mapID)
+            #         print("")
+            #         print("Paths upload: ", paths_upload)
+            #         print("Selected materials: ", selected_materials)
+            #         fullPath = ""
+            #         mat.SetName(item)
+            #         if mapID == "COL" or mapID == "COLOR":
+            #             if not loadAO:
+            #                 bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #                 bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #                 mat.InsertShader(bitmap)
+            #                 mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #             else:
+            #                 if not fusionShader:
+            #                     fusionShader = c4d.BaseShader(c4d.Xfusion)
+            #                     fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+            #                     fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+            #                     mat.InsertShader(fusionShader)
+            #                     mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
+            #                 bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #                 bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #                 fusionShader.InsertShader(bitmap)
+            #                 fusionShader.SetParameter(c4d.SLA_FUSION_BASE_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "NRM":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             texture = c4d.BaseShader(ID.PLUGINID_CORONA4D_NORMALSHADER)
+            #             texture.SetParameter(ID.CORONA_NORMALMAP_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #             texture.SetParameter(ID.CORONA_NORMALMAP_FLIP_G, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.InsertShader(texture)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, texture, c4d.DESCFLAGS_SET_NONE)
+            #         elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MIN_LEVEL, 0, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
+            #         elif loadAO and mapID == "AO":
+            #             if not fusionShader:
+            #                 fusionShader = c4d.BaseShader(c4d.Xfusion)
+            #                 fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+            #                 fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+            #                 mat.InsertShader(fusionShader)
+            #                 mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             fusionShader.InsertShader(bitmap)
+            #             fusionShader.SetParameter(c4d.SLA_FUSION_BLEND_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "OPAC":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "GLOSS":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "REFL":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_MATERIAL_REFLECT, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_REFLECT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "SSS":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_SSS, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_VOLUME_SSS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "SSSABSORB":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_MATERIAL_VOLUME, True, c4d.DESCFLAGS_SET_NONE)
+            #             mat.SetParameter(ID.CORONA_VOLUME_ABSORPTION_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         # elif loadIor and mapID == "IOR":
+            #         #     bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #         #     bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #         #     mat.InsertShader(bitmap)
+            #         #     mat.SetParameter(ID.CORONA_REFLECT_FRESNELLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         elif mapID == "METAL":
+            #             bitmap = c4d.BaseShader(c4d.Xbitmap)
+            #             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+            #             mat.InsertShader(bitmap)
+            #             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+            #         doc = c4d.documents.GetActiveDocument()
+            #         doc.StartUndo()
+            #         doc.InsertMaterial(mat)
+            #         doc.AddUndo(c4d.UNDOTYPE_NEW, mat)
+            #         doc.EndUndo()
+            #         material_to_add.append(mat)                                   
+            #         self.SetString(ID.DIALOG_ERROR, "")
+            #         for index, checkbox in enumerate(tex_list):
+            #             # print("Tohle je checkbox v listu tex_list: ", checkbox)
+            #             # if the checkbox is checked
+            #             if checkbox.IsSelected:
+            #                 checkbox.Deselect()
+            #     c4d.EventAdd()
+
             for mapID in materials_upload:
                 print(mapID)
                 print(folder_path)
