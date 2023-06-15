@@ -782,6 +782,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         else:
             print("I'm on the edge")
 
+    # gets the name from id of the list
     def get_name_from_id(self, id: int, index_list: list, name_list: list):
         index = index_list.index(id)
         name = name_list[index]
@@ -806,7 +807,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             index = file_list.index(previous)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
-
 
     def Command(self, id, msg,):
         if id == ID.DIALOG_FOLDER_BUTTON:
@@ -897,9 +897,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 #             self.SetError("One or more folders do not contain the correct Reawote material.")
                 #             print(folder, " neobsahuje spravnou slozku")
 
-            # enables pressing the Filter materials button
             self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
-            # enables pressing the Select all button
             self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
 
             self.Enable(ID.DIALOG_DROPBOX_BUTTON1, True)
@@ -921,7 +919,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
             
-            # count = len(checkbox_list)
             n = 1
             id_mat = 4000
             while 40 >= n:
@@ -966,11 +963,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 folder_path_list.append(folder_path)
 
         if id == ID.DIALOG_DELETE_BUTTON:
-            # for checkbox in self._listView.listOfTexture:
-            #     if checkbox.IsSelected:
-            #         self._listView.listOfTexture.remove(checkbox)
-            # self._treegui.Refresh()
-
             for tex in reversed(self._listView.listOfTexture):
                 if tex.IsSelected:
                     idicko = self._listView.listOfTexture.index(tex)
@@ -996,8 +988,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
         #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
-
-        #TODO comment all sections of the code
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
@@ -1030,9 +1020,10 @@ class ReawoteSorterDialog(gui.GeDialog):
             
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
+        # button for filtering and uploading materials
         if id == ID.FILTER_MATERIALS_BUTTON:
             assigned_material = ""
-            set_of_materials_to_load = []
+            materials_to_upload = []
 
             # goes through all checkboxes
             for index, checkbox in enumerate(tex_list):
@@ -1040,18 +1031,20 @@ class ReawoteSorterDialog(gui.GeDialog):
                 # if the checkbox is checked
                 if checkbox.IsSelected:
                     print("Checked checkbox: ", checkbox)
-                    # saves the name of the material that is assigned to the checkbox in selected_materials list e.g. Material 2
+                    # saves the material number that is assigned to the checkbox in selected_materials list e.g. Material 2
                     assigned_material = selected_materials[index]
-                    if assigned_material not in set_of_materials_to_load:
-                        set_of_materials_to_load.append(assigned_material)     
+                    # condition to avoid duplicates - if the material is not already there
+                    if assigned_material not in materials_to_upload:
+                        # then add it into the list
+                        materials_to_upload.append(assigned_material)     
             
-            print(" ")
-            # goes through all selected_materials that are assigned to checkboxes
-            for assigned_material in set_of_materials_to_load:
+            # goes through materials that were selected in the dropbox e.g. Material 2, Material 5, ...
+            for assigned_material in materials_to_upload:
+                # cycle to get the index of the selected material
                 for index, selected_material in enumerate(selected_materials):
                     if selected_material == assigned_material:
                         uploaded_indexes.append(index)
-                # TODO independency on lists from selected_ lists
+                # goes through all indexes that belong to selected materials
                 for index in uploaded_indexes:
                     file = selected_files[index]
                     map = selected_maps[index]
@@ -1059,6 +1052,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     uploaded_files.append(file)
                     uploaded_maps.append(map)
                     uploaded_paths.append(path)
+                # control prints
                 print("Assigned material: ", assigned_material)
                 print("Assigned material indexes: ", uploaded_indexes)
                 print("Selected files: ", uploaded_files)
@@ -1180,17 +1174,12 @@ class ReawoteSorterDialog(gui.GeDialog):
                     doc.EndUndo()
                     material_to_add.append(mat)                                   
                     self.SetString(ID.DIALOG_ERROR, "")
-                    for index, checkbox in enumerate(tex_list):
-                        # print("Tohle je checkbox v listu tex_list: ", checkbox)
-                        # if the checkbox is checked
-                        if checkbox.IsSelected:
-                            checkbox.Deselect()
-                    c4d.EventAdd()
+            c4d.EventAdd()
 
-                uploaded_indexes.clear()
-                uploaded_files.clear()
-                uploaded_maps.clear()
-                uploaded_paths.clear()
+            uploaded_indexes.clear()
+            uploaded_files.clear()
+            uploaded_maps.clear()
+            uploaded_paths.clear()
 
         if id == ID.DIALOG_SELECT_ALL_BUTTON:
             select_all = True
