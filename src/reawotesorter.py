@@ -90,6 +90,8 @@ class ID():
 
     DIALOG_GROUP3_DOPBOXES = 100027
     DIALOG_TEXT_DROPBOX = 100028
+    DIALOG_NEXT_MATERIAL_BUTTON = 100035
+    DIAlOG_PREVIOUS_MATERIAL_BUTTON = 100036
     DIALOG_DROPBOX_MAIN3 = 100026
 
     DIALOG_GROUP_MINI_BUTTONS = 100031
@@ -502,18 +504,18 @@ class ListView(c4d.gui.TreeViewFunctions):
         "Called when a delete event is received."
         for tex in reversed(self.listOfTexture):
             if tex.IsSelected:
-                idicko = self.listOfTexture.index(tex)
-                print("Odstranuju tento index: ", idicko)
-                selected_maps.pop(idicko)
+                id_tex = self.listOfTexture.index(tex)
+                print("Odstranuju tento index: ", id_tex)
+                selected_maps.pop(id_tex)
                 print(selected_maps)
-                selected_materials.pop(idicko)
+                selected_materials.pop(id_tex)
                 print(selected_materials)
-                selected_files.pop(idicko)
+                selected_files.pop(id_tex)
                 print(selected_files)
-                selected_paths.pop(idicko)
+                selected_paths.pop(id_tex)
                 print(selected_paths)
                 self.listOfTexture.remove(tex)
-                tex_list.pop(idicko)
+                tex_list.pop(id_tex)
     
     # map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 
@@ -541,7 +543,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         pass
 
     def CreateLayout(self):
-
         defaultFlags: int = c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT
 
         self.SetTitle("Reawote Sorter")
@@ -562,15 +563,17 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.GroupEnd()
 
         self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
-        self.GroupBorderSpace(8, 2, 0, 2)
+        self.GroupBorderSpace(8, 2, 36, 2)
         self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
         self.GroupEnd()
 
-        self.GroupBegin(ID.DIALOG_GROUP3_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Map Select", 0, 10, 10)
+        self.GroupBegin(ID.DIALOG_GROUP3_DOPBOXES, c4d.BFH_SCALEFIT, 4, 1, "Map Select", 0, 10, 10)
         self.GroupBorderSpace(8, 2, 0, 2)
         self.AddStaticText(ID.DIALOG_TEXT_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select material", 0)
+        self.AddButton(ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON, c4d.BFH_CENTER, 1, 1, "<")
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
+        self.AddButton(ID.DIALOG_NEXT_MATERIAL_BUTTON, c4d.BFH_CENTER, 1, 1, ">")
         self.GroupEnd()
         
         customgui = c4d.BaseContainer()
@@ -650,6 +653,8 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         self.Enable(ID.DIALOG_TEXT_DROPBOX, False)
         self.Enable(ID.DIALOG_DROPBOX_MAIN2, False)
+        self.Enable(ID.DIALOG_NEXT_MATERIAL_BUTTON, False)
+        self.Enable(ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON, False)
 
         self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, False)
         self.Enable(ID.DIALOG_DELETE_BUTTON, False)
@@ -673,7 +678,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         # set TreeViewFunctions instance used by our CUSTOMGUI_TREEVIEW
         root = self._treegui.SetRoot(self._treegui, self._listView, None)
 
-        # deletes all items in treeview if not empty
+        # deletes all items in treeview and lists if not empty
         while len(self._listView.listOfTexture) != 0:
             self._listView.listOfTexture.clear()
         self._treegui.Refresh()
@@ -786,12 +791,12 @@ class ReawoteSorterDialog(gui.GeDialog):
         return name
 
     # gets the next item in the dropbox        
-    def get_next_item(self, dropbox_id: int, file_list: list, file_name_list: list):
+    def get_next_item(self, dropbox_id: int, file_id_list: list, file_name_list: list):
         actual = self.GetLong(dropbox_id)
-        if actual+1 in file_list:
+        if actual+1 in file_id_list:
             next = actual+1
             self.SetInt32(dropbox_id, next)
-            index = file_list.index(next)
+            index = file_id_list.index(next)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
 
@@ -822,23 +827,19 @@ class ReawoteSorterDialog(gui.GeDialog):
             dir = os.listdir(path)
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
             # variable for first item in dir
-            first_name = None
+            first_file = None
             num = 0
             ID_CHILD = 9000
             for file in dir:
                 folder_path = os.path.join(path, file)
                 while num <= 0:
-                    first_name = file
+                    first_file = file
                     num += 1
                 ID_CHILD += 1
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
                 child_list.append(ID_CHILD)
                 child_name_list.append(file)
-                print(first_name)
                 checkbox_list.append(file)
-                print(folder_path)
-                print(ID_CHILD)
-                print(" ")
                 folder_path_list.append(folder_path)
                 self._treegui.Refresh()
 
@@ -905,6 +906,8 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             self.Enable(ID.DIALOG_TEXT_DROPBOX, True)
             self.Enable(ID.DIALOG_DROPBOX_MAIN2, True)
+            self.Enable(ID.DIALOG_NEXT_MATERIAL_BUTTON, True)
+            self.Enable(ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON, True)
 
             self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, True)
             self.Enable(ID.DIALOG_DELETE_BUTTON, True)
@@ -928,6 +931,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 material_id_list.append(id_mat)
                 material_name_list.append(material_name)
                 id_mat+=1
+
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN2, material_id_list[0])
             
             id_map = 4500
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
@@ -936,12 +941,10 @@ class ReawoteSorterDialog(gui.GeDialog):
                 map_id_list.append(id_map)                
                 id_map+=1
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
-            # parts = first_name.split(".")[0].split("_")
-            # mapID = parts[3]
-            self.auto_assign(first_name)
+            self.auto_assign(first_file)
 
         if id == ID.DIALOG_ADD_TO_QUEUE_BUTTON:
-            path = c4d.storage.LoadDialog(title="Choose folder to be added to TreeView", flags=c4d.FILESELECT_DIRECTORY)
+            path = c4d.storage.LoadDialog(title="Choose folder to be added to the list", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
                 return True
             try:
@@ -965,29 +968,31 @@ class ReawoteSorterDialog(gui.GeDialog):
         if id == ID.DIALOG_DELETE_BUTTON:
             for tex in reversed(self._listView.listOfTexture):
                 if tex.IsSelected:
-                    idicko = self._listView.listOfTexture.index(tex)
-                    print("Odstranuju tento index: ", idicko)
-                    selected_maps.pop(idicko)
-                    print(selected_maps)
-                    selected_materials.pop(idicko)
-                    print(selected_materials)
-                    selected_files.pop(idicko)
-                    print(selected_files)
-                    selected_paths.pop(idicko)
-                    print(selected_paths)
+                    id_tex = self._listView.listOfTexture.index(tex)
+                    print("Index to be deleted: ", id_tex)
+                    selected_maps.pop(id_tex)
+                    selected_materials.pop(id_tex)
+                    selected_files.pop(id_tex)
+                    selected_paths.pop(id_tex)
                     self._listView.listOfTexture.remove(tex)
-                    tex_list.pop(idicko)
+                    tex_list.pop(id_tex)
                     self._treegui.Refresh()
 
-        # go back button <
+        # file go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
         
-        # go forward button >
+        # file go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
-        #TODO Select all, Hledani obecne materialu mimo reawote, hledani podle zkratek
+        # material go back button <
+        if id == ID.DIALOG_NEXT_MATERIAL_BUTTON:
+            self.get_next_item(ID.DIALOG_DROPBOX_MAIN2, material_id_list, material_name_list)
+
+        # material go forward button >
+        if id == ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON:
+            self.get_previous_item(ID.DIALOG_DROPBOX_MAIN2, material_id_list, material_name_list)
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
@@ -1007,7 +1012,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             print("Selected material:", selected_material_name, " and his ID: ", selected_material_id)
 
             newID = len(self._listView.listOfTexture) + 1
-            print(newID)
             tex = TextureObject(selected_file_name.format(newID),selected_map_name, selected_material_name)
             self._listView.listOfTexture.append(tex)
             self._treegui.Refresh()
@@ -1020,14 +1024,13 @@ class ReawoteSorterDialog(gui.GeDialog):
             
             self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
 
-        # button for filtering and uploading materials
+        # filtering and uploading materials
         if id == ID.FILTER_MATERIALS_BUTTON:
             assigned_material = ""
             materials_to_upload = []
 
             # goes through all checkboxes
             for index, checkbox in enumerate(tex_list):
-                print("Tohle je checkbox v listu tex_list: ", checkbox)
                 # if the checkbox is checked
                 if checkbox.IsSelected:
                     print("Checked checkbox: ", checkbox)
@@ -1108,7 +1111,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, texture, c4d.DESCFLAGS_SET_NONE)
-                    elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
+                    # elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
+                    elif mapID == "DISP":
                         bitmap = c4d.BaseShader(c4d.Xbitmap)
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                         mat.InsertShader(bitmap)
@@ -1116,7 +1120,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MIN_LEVEL, 0, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
-                    elif loadAO and mapID == "AO":
+                    # elif loadAO and mapID == "AO":
+                    elif mapID == "AO":
                         if not fusionShader:
                             fusionShader = c4d.BaseShader(c4d.Xfusion)
                             fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
@@ -1175,7 +1180,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     material_to_add.append(mat)                                   
                     self.SetString(ID.DIALOG_ERROR, "")
             c4d.EventAdd()
-
+            # emptying the lists for another material
             uploaded_indexes.clear()
             uploaded_files.clear()
             uploaded_maps.clear()
@@ -1232,7 +1237,6 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, False)
         self.SetBool(ID.DIALOG_MAP_IOR_CB, False)
         self.Enable(ID.DIALOG_MAP_IOR_CB, False)
-
         self.Enable(ID.DIALOG_LOAD_BUTTON, False)
         # self.Enable(ID.FILTER_MATERIALS_BUTTON, False)
         
