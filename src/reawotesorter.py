@@ -12,7 +12,7 @@ checkbox_list = []
 same_path_dirs = []
 material_to_add = []
 materialCount = []
-child_list = []
+child_id_list = []
 child_name_list = []
 map_id_list = []
 material_id_list = []
@@ -29,6 +29,7 @@ uploaded_maps = []
 uploaded_paths = []
 map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]    
 newID = 0
+count = 1
 path = " "
 
 ID_CHECKBOX = 999
@@ -695,8 +696,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         while len(materialCount) != 0:
             materialCount.clear()
 
-        while len(child_list) != 0:
-            child_list.clear()
+        while len(child_id_list) != 0:
+            child_id_list.clear()
         
         while len(child_name_list) != 0:
             child_name_list.clear()
@@ -733,7 +734,15 @@ class ReawoteSorterDialog(gui.GeDialog):
             # check all possible map names and types
             if "AO" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
+            elif "ambient" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
+            elif "Ambient" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
+            elif "ao" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4500)
             elif "NRM" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+            elif "nrm" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
             elif "NRM16" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
@@ -741,11 +750,18 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
             elif "normal" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
+            # DISP taktez prezdivana HEIGHT
             elif "DISP" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "Displacement" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif "disp" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "DISP16" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif "HEIGHT" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
+            elif "height" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "DIFF" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
@@ -753,19 +769,33 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "diffuse" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "Diffuse" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "COL" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+            elif "col" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "COLOR" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+            elif "color" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "GLOSS" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+            elif "gloss" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
             elif "Glosiness" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
             elif "ROUGH" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
+            elif "rough" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
             elif "METAL" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+            elif "metal" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
             elif "OPAC" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
+            elif "opac" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
             elif "SPEC" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
@@ -779,7 +809,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
             elif "ANIS" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
+            elif "anis" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
             elif "SHEEN" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
+            elif "sheen" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
         else:
             print("There's no more")
@@ -811,6 +845,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.auto_assign(actual_name)
 
     def Command(self, id, msg,):
+        count = 1
         if id == ID.DIALOG_FOLDER_BUTTON:
             path = c4d.storage.LoadDialog(title="Choose material folder", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
@@ -819,25 +854,26 @@ class ReawoteSorterDialog(gui.GeDialog):
                 path = path.decode("utf-8")
             except: 
                 pass
-            # textBox fills up with path of chosen folder
+            # textbox fills up with path of the selected folder
             self.SetString(ID.DIALOG_FOLDER_LIST, path)
 
             print(path)
             # saves all files in path as dir
             dir = os.listdir(path)
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
-            # variable for first item in dir
             first_file = None
             num = 0
             ID_CHILD = 9000
             for file in dir:
                 folder_path = os.path.join(path, file)
+                # saves the first file as first_file
                 while num <= 0:
                     first_file = file
                     num += 1
                 ID_CHILD += 1
+                # adds the file to the dropbox
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
-                child_list.append(ID_CHILD)
+                child_id_list.append(ID_CHILD)
                 child_name_list.append(file)
                 checkbox_list.append(file)
                 folder_path_list.append(folder_path)
@@ -918,31 +954,34 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
             
-            n = 1
             id_mat = 4000
-            if len(dir) < 40:
-                lim = len(dir)
-            else:
-                lim = 40
-            while lim >= n:
-                material_name = "Material " + str(n)
+            # sets the limit for number of materials to the dropbox
+            # if len(dir) < 40:
+            #     lim = len(dir)
+            # else:
+            #     lim = 40
+            while 20 >= count:
+                material_name = "Material " + str(count)
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN2, id_mat, material_name)
-                n+=1
+                count+=1
                 material_id_list.append(id_mat)
                 material_name_list.append(material_name)
                 id_mat+=1
-
+            # sets the first item in materials list to the dropbox, most likely Material
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN2, material_id_list[0])
             
             id_map = 4500
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            # fills the dropbox with all maps
             for map in map_names_list:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, id_map, map)
                 map_id_list.append(id_map)                
                 id_map+=1
-            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_list[0])
+            # sets the default value for the dropbox as the first item in the list or matches the one that is in the list already
+            self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_id_list[0])
             self.auto_assign(first_file)
 
+        # adds another folder to the list of files in the dropbox
         if id == ID.DIALOG_ADD_TO_QUEUE_BUTTON:
             path = c4d.storage.LoadDialog(title="Choose folder to be added to the list", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
@@ -954,17 +993,18 @@ class ReawoteSorterDialog(gui.GeDialog):
 
             self.SetString(ID.DIALOG_FOLDER_LIST, path)
             dir = os.listdir(path)
-            ID_CHILD = child_list[-1]
+            ID_CHILD = child_id_list[-1]
             for file in dir:
                 folder_path = os.path.join(path,file)
                 ID_CHILD += 1
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN, ID_CHILD, file)
-                child_list.append(ID_CHILD)
+                child_id_list.append(ID_CHILD)
                 child_name_list.append(file)
                 checkbox_list.append(file)
                 print(ID_CHILD)
                 folder_path_list.append(folder_path)
 
+        # deletes file that has checked checkbox
         if id == ID.DIALOG_DELETE_BUTTON:
             for tex in reversed(self._listView.listOfTexture):
                 if tex.IsSelected:
@@ -980,11 +1020,11 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         # file go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
-            self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_id_list, child_name_list)
         
         # file go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
-            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_id_list, child_name_list)
 
         # material go back button <
         if id == ID.DIALOG_NEXT_MATERIAL_BUTTON:
@@ -996,9 +1036,9 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
-            selected_file_name = self.get_name_from_id(selected_file_id, child_list, child_name_list)
+            selected_file_name = self.get_name_from_id(selected_file_id, child_id_list, child_name_list)
             print("")
-            selected_file_path = self.get_name_from_id(selected_file_id,child_list, folder_path_list)
+            selected_file_path = self.get_name_from_id(selected_file_id,child_id_list, folder_path_list)
             print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id, " and his path: ", selected_file_path)
 
             map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
@@ -1022,7 +1062,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_maps.append(selected_map_name)
             selected_paths.append(selected_file_path)
             
-            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_list, child_name_list)
+            self.get_next_item(ID.DIALOG_DROPBOX_MAIN, child_id_list, child_name_list)
 
         # filtering and uploading materials
         if id == ID.FILTER_MATERIALS_BUTTON:
@@ -1076,11 +1116,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 fusionShader = None
 
                 for index, mapID in enumerate(uploaded_maps):
-                    print(mapID)
-                    print(folder_path)
                     # gets the path of the actual file through its index
                     fullPath = uploaded_paths[index]
-                    print(fullPath)
                     # sets the name of the final material same as the material that is attached to the file e.g. Material 2
                     mat.SetName(assigned_material)
                     if mapID == "COL" or mapID == "COLOR":
