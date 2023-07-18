@@ -820,6 +820,7 @@ class ReawoteSorterDialog(gui.GeDialog):
 
     def Command(self, id, msg,):
         count = 1
+        # browse button
         if id == ID.DIALOG_FOLDER_BUTTON:
             path = c4d.storage.LoadDialog(title="Choose material folder", flags=c4d.FILESELECT_DIRECTORY)
             if path == None:
@@ -955,6 +956,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_id_list[0])
             print(f"Tohle je first file: {first_file}")
             self.auto_assign(first_file)
+            self.Enable(ID.DIALOG_FOLDER_BUTTON, False)
 
         # adds another folder to the list of files in the dropbox
         if id == ID.DIALOG_ADD_TO_QUEUE_BUTTON:
@@ -1059,6 +1061,10 @@ class ReawoteSorterDialog(gui.GeDialog):
             # goes through materials that were selected in the dropbox e.g. Material 2, Material 5, ...
             for assigned_material in materials_to_upload:
                 # cycle to get the index of the selected material
+                uploaded_files.clear()
+                uploaded_maps.clear()
+                uploaded_paths.clear()
+                uploaded_indexes.clear()
                 for index, selected_material in enumerate(selected_materials):
                     if selected_material == assigned_material:
                         uploaded_indexes.append(index)
@@ -1071,6 +1077,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                     uploaded_maps.append(map)
                     uploaded_paths.append(path)
                 # control prints
+                print(f"Selected maps: {selected_maps}")
+                print("")
                 print("Assigned material: ", assigned_material)
                 print("Assigned material indexes: ", uploaded_indexes)
                 print("Selected files: ", uploaded_files)
@@ -1193,6 +1201,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                         mat.InsertShader(bitmap)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                    elif mapID == "BUMP":
+                        print("necum ty dementiku")
                     doc = c4d.documents.GetActiveDocument()
                     doc.StartUndo()
                     doc.InsertMaterial(mat)
