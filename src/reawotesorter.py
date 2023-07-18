@@ -791,6 +791,10 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
             elif "opac" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+            elif "BUMP" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
+            elif "bump" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
 
     # gets the name from id of the list
     def get_name_from_id(self, id: int, index_list: list, name_list: list):
@@ -946,7 +950,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN2, material_id_list[0])
             
             id_map = 4500
-            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit", "BUMP_Bump map"]
             # fills the dropbox with all maps
             for map in map_names_list:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, id_map, map)
@@ -1018,8 +1022,8 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_file_path = self.get_name_from_id(selected_file_id,child_id_list, folder_path_list)
             print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id, " and his path: ", selected_file_path)
 
-            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit"]            
-            map_shortcuts = ["AO", "NRM", "DISP", "COL", "GLOSS","ROUGH", "METAL", "OPAC"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit", "BUMP_Bump map"]            
+            map_shortcuts = ["AO", "NRM", "DISP", "COL", "GLOSS", "ROUGH", "METAL", "OPAC", "BUMP"]
             selected_map_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
             selected_map_name = self.get_name_from_id(selected_map_id, map_id_list, map_shortcuts)
             print("Selected map: ", selected_map_name, " and his ID: ", selected_map_id)
@@ -1203,6 +1207,12 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     elif mapID == "BUMP":
                         print("necum ty dementiku")
+                        bitmap = c4d.BaseShader(c4d.Xbitmap)
+                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                        mat.InsertShader(bitmap)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     doc = c4d.documents.GetActiveDocument()
                     doc.StartUndo()
                     doc.InsertMaterial(mat)
