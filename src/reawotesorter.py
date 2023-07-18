@@ -763,60 +763,34 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "height" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
-            elif "DIFF" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "diff" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "diffuse" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
-            elif "Diffuse" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "COL" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "col" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "COLOR" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "color" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "albedo" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "GLOSS" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "gloss" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "Glosiness" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4504)
             elif "ROUGH" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
             elif "rough" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4505)
             elif "METAL" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
             elif "metal" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4506)
             elif "OPAC" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
             elif "opac" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
-            elif "SPEC" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "Specular" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "spec" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "SPECLVL" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4508)
-            elif "SSSABSORB_SSS" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4509)
-            elif "ANIS" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
-            elif "anis" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4511)
-            elif "SHEEN" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
-            elif "sheen" in actual_name:
-                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4512)
-        else:
-            print("There's no more")
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4507)
 
     # gets the name from id of the list
     def get_name_from_id(self, id: int, index_list: list, name_list: list):
@@ -860,7 +834,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             print(path)
             # saves all files in path as dir
             dir = os.listdir(path)
-            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit"]
             first_file = None
             num = 0
             ID_CHILD = 9000
@@ -971,7 +945,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN2, material_id_list[0])
             
             id_map = 4500
-            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit"]
             # fills the dropbox with all maps
             for map in map_names_list:
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN3, id_map, map)
@@ -979,6 +953,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 id_map+=1
             # sets the default value for the dropbox as the first item in the list or matches the one that is in the list already
             self.SetInt32(ID.DIALOG_DROPBOX_MAIN, child_id_list[0])
+            print(f"Tohle je first file: {first_file}")
             self.auto_assign(first_file)
 
         # adds another folder to the list of files in the dropbox
@@ -1041,8 +1016,8 @@ class ReawoteSorterDialog(gui.GeDialog):
             selected_file_path = self.get_name_from_id(selected_file_id,child_id_list, folder_path_list)
             print("Selected file: ", selected_file_name, " and his ID: ", selected_file_id, " and his path: ", selected_file_path)
 
-            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "DIFF_Diffuse","COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "SPEC_Specular", "SSS_Subsurface scattering", "SSSABSORB_SSS absorbtion", "OPAC_Opacit", "ANIS_Anisotropy", "SHEEN_Sheen"]            
-            map_shortcuts = ["AO", "NRM", "DISP", "DIFF", "COL", "GLOSS","ROUGH", "METAL", "SPEC", "SSS", "SSSABSORB", "OPAC", "ANIS", "SHEEN"]
+            map_names_list = ["AO_Ambient occlusion", "NRM_Normal map", "DISP_Displacement", "COL_Color", "GLOSS_Glossiness", "ROUGH_Roughness", "METAL_Metallic", "OPAC_Opacit"]            
+            map_shortcuts = ["AO", "NRM", "DISP", "COL", "GLOSS","ROUGH", "METAL", "OPAC"]
             selected_map_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN3)
             selected_map_name = self.get_name_from_id(selected_map_id, map_id_list, map_shortcuts)
             print("Selected map: ", selected_map_name, " and his ID: ", selected_map_id)
@@ -1110,7 +1085,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 load16bdispl = self.GetBool(ID.DIALOG_MAP_16B_DISPL_CB)
                 # loadIor = self.GetBool(ID.DIALOG_MAP_IOR_CB
                 mat = c4d.BaseMaterial(ID.CORONA_STR_MATERIAL_PHYSICAL)
-                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
                 mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
                 mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
                 fusionShader = None
@@ -1176,11 +1150,21 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA, True, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     elif mapID == "GLOSS":
+                        print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
                         bitmap = c4d.BaseShader(c4d.Xbitmap)
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                         mat.InsertShader(bitmap)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
+                    elif mapID == "ROUGH":
+                        print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
+                        bitmap = c4d.BaseShader(c4d.Xbitmap)
+                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                        mat.InsertShader(bitmap)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_ROUGHNESS, c4d.DESCFLAGS_SET_NONE)
                     elif mapID == "REFL":
                         bitmap = c4d.BaseShader(c4d.Xbitmap)
                         bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
