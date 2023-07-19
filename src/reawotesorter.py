@@ -774,6 +774,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "color" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "diff" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "albedo" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "GLOSS" in actual_name:
