@@ -1118,12 +1118,13 @@ class ReawoteSorterDialog(gui.GeDialog):
                     # sets the name of the final material same as the material that is attached to the file e.g. Material 2
                     mat.SetName(assigned_material)
                     if mapID == "COL":
-                        if not loadAO:
+                        if "AO" not in uploaded_maps:
                             bitmap = c4d.BaseShader(c4d.Xbitmap)
                             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                             mat.InsertShader(bitmap)
                             mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        else:
+                        # else:
+                        else: 
                             if not fusionShader:
                                 fusionShader = c4d.BaseShader(c4d.Xfusion)
                                 fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
@@ -1156,8 +1157,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
                     # elif loadAO and mapID == "AO":
                     elif mapID == "AO":
-                        fusionShader = c4d.BaseShader(c4d.Xfusion)
-                        if not "COL" in uploaded_maps:
+                        if not fusionShader:
+                            fusionShader = c4d.BaseShader(c4d.Xfusion)
                             fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
                             fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
                             mat.InsertShader(fusionShader)
