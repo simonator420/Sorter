@@ -719,6 +719,9 @@ class ReawoteSorterDialog(gui.GeDialog):
         
         while len(selected_paths) != 0:
             selected_paths.clear()
+
+        while len(selected_maps) != 0:
+            selected_maps.clear()
         
         while len(tex_list) != 0:
             tex_list.clear()
@@ -1015,7 +1018,9 @@ class ReawoteSorterDialog(gui.GeDialog):
         if id == ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON:
             self.get_previous_item(ID.DIALOG_DROPBOX_MAIN2, material_id_list, material_name_list)
 
+        
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
+
             selected_file_id = self.GetInt32(ID.DIALOG_DROPBOX_MAIN)
             selected_file_name = self.get_name_from_id(selected_file_id, child_id_list, child_name_list)
             print("")
@@ -1047,6 +1052,11 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         # filtering and uploading materials
         if id == ID.FILTER_MATERIALS_BUTTON:
+            print("")
+            print(f"Tohle jsou selected_maps: {selected_maps}")
+            print(f"Tohle jsou selected_materials: {selected_materials}")
+            print(f"Tohle jsou selected_files: {selected_files}")                        
+            print("")
             assigned_material = ""
             materials_to_upload = []
 
@@ -1060,11 +1070,12 @@ class ReawoteSorterDialog(gui.GeDialog):
                     # condition to avoid duplicates - if the material is not already there
                     if assigned_material not in materials_to_upload:
                         # then add it into the list
-                        materials_to_upload.append(assigned_material)     
+                        materials_to_upload.append(assigned_material)
+                        print(f"{assigned_material} byl pridan do materials_to_upload")
             
             # goes through materials that were selected in the dropbox e.g. Material 2, Material 5, ...
             for assigned_material in materials_to_upload:
-                # cycle to get the index of the selected material
+                # # cycle to get the index of the selected material
                 uploaded_files.clear()
                 uploaded_maps.clear()
                 uploaded_paths.clear()
@@ -1081,7 +1092,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     uploaded_maps.append(map)
                     uploaded_paths.append(path)
                 # control prints
-                print(f"Selected maps: {selected_maps}")
+                
                 print("")
                 print("Assigned material: ", assigned_material)
                 print("Assigned material indexes: ", uploaded_indexes)
@@ -1106,7 +1117,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     fullPath = uploaded_paths[index]
                     # sets the name of the final material same as the material that is attached to the file e.g. Material 2
                     mat.SetName(assigned_material)
-                    if mapID == "COL" or mapID == "COLOR":
+                    if mapID == "COL":
                         if not loadAO:
                             bitmap = c4d.BaseShader(c4d.Xbitmap)
                             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
@@ -1145,8 +1156,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
                     # elif loadAO and mapID == "AO":
                     elif mapID == "AO":
-                        if not fusionShader:
-                            fusionShader = c4d.BaseShader(c4d.Xfusion)
+                        fusionShader = c4d.BaseShader(c4d.Xfusion)
+                        if not "COL" in uploaded_maps:
                             fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
                             fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
                             mat.InsertShader(fusionShader)
