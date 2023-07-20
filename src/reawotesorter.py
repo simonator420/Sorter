@@ -776,6 +776,8 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "diff" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
+            elif "DIFF" in actual_name:
+                self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "albedo" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4503)
             elif "GLOSS" in actual_name:
@@ -1220,13 +1222,13 @@ class ReawoteSorterDialog(gui.GeDialog):
                         mat.InsertShader(bitmap)
                         mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     elif mapID == "BUMP":
-                        print("necum ty dementiku")
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        if "NRM" not in uploaded_maps:
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     doc = c4d.documents.GetActiveDocument()
                     doc.StartUndo()
                     doc.InsertMaterial(mat)
