@@ -85,7 +85,7 @@ if __name__=='__main__':
         str="Reawote Sorter",
         help="HELP",
         dat=loader, 
-        info=PLUGINFLAG_COMMAND_OPTION_DIALOG, 
+        info=0, 
         icon=icon)
     
     loader.thread.Start()

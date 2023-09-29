@@ -64,11 +64,14 @@ class ID():
     # TODO zde pridat textove pole se slozkama
 
     DIALOG_MAIN_GROUP = 100014
+    DIALOG_SECONDARY_GROUP = 100019
     DIALOG_SCROLL_GROUP = 100012
     DIALOG_SCROLL_GROUP_TWO = 100016
     DIALOG_SECONDARY_GROUP = 10011
     DIALOG_FOLDER_LIST = 100015
     FILTER_MATERIALS_BUTTON = 100017
+
+    DIALOG_GROUP4_BUTTONS = 100038
     DIALOG_ADD_TO_LIST_BUTTON = 100030
     DIALOG_LIST_CHECKBOX = 100013
     
@@ -103,6 +106,8 @@ class ID():
     DIALOG_CB_GROUP = 100034
 
     ID_CHILD = 9000
+
+    MATERIAL_PREVIEW = 800
 
     # Todo: generate this with swig
     PLUGINID_CORONA4D_MATERIAL = 1032100
@@ -370,6 +375,25 @@ class ID():
     CORONA_NORMALMAP_CUSTOM_UVW_OVERRIDE = 11341
     CORONA_NORMALMAP_CUSTOM_UVW_CHANNEL = 11342
 
+class MaterialPreview(c4d.gui.GeUserArea):
+    def __init__(self, bmp):
+      super(MaterialPreview, self).__init__()
+      self._bmp = bmp
+
+    def DrawMsg(self, x1, y1, x2, y2, msg):
+      #self.DrawSetPen(c4d.Vector(0))
+      #self.DrawRectangle(0, 0, 42, 42)
+      if not self._bmp: return
+
+      coords = self.Local2Global()
+      self.DrawBitmap(self._bmp, 0, 0, 42, 42, 0, 0, 42, 42, c4d.BMP_NORMAL | c4d.BMP_ALLOWALPHA)
+
+    def GetMinSize(self):
+      return 42, 42
+
+    def setBitmap(self, bmp):
+      self._bmp = bmp
+
 class TextureObject(object):
     texturePath = "TexPath"
     mapNameData = ""
@@ -540,6 +564,10 @@ class ReawoteSorterDialog(gui.GeDialog):
     _listView = ListView()
 
     def __init__(self):
+        self._area = MaterialPreview(None)
+        self.MaterialPreviewBmp = c4d.bitmaps.BaseBitmap()
+        self.MaterialPreviewBmpTmp = c4d.bitmaps.BaseBitmap()
+        self.MaterialPreviewBmp.Init(42, 42)
         super(ReawoteSorterDialog, self).__init__()
         pass
 
@@ -557,13 +585,18 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddButton(ID.DIALOG_FOLDER_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Browse")
         self.GroupEnd()
 
-        self.GroupBegin(ID.DIALOG_GROUP_DROPBOXES, c4d.BFH_SCALEFIT, 3, 1, "File Select", 0, 10, 10)
-        self.AddButton(ID.DIALOG_DROPBOX_BUTTON1,c4d.BFH_LEFT, initw=50,inith=0, name="<")
+        self.GroupBegin(ID.DIALOG_GROUP_DROPBOXES, c4d.BFH_SCALEFIT, 4, 1, "File Select", 0, 10, 10)
+        self.GroupBorderSpace(8, 2, 0, 2)
+        self.AddUserArea(ID.MATERIAL_PREVIEW, c4d.BFH_CENTER, 42, 42)
+        self.AttachUserArea(self._area, ID.MATERIAL_PREVIEW)
+        self.AddButton(ID.DIALOG_DROPBOX_BUTTON1,c4d.BFH_LEFT, initw=10,inith=0, name="<")
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN,c4d.BFH_SCALEFIT, allowfiltering=True)
-        self.AddButton(ID.DIALOG_DROPBOX_BUTTON2,c4d.BFH_RIGHT, initw=50,inith=0, name=">")
+        self.AddButton(ID.DIALOG_DROPBOX_BUTTON2,c4d.BFH_RIGHT, initw=10,inith=0, name=">")
+        self.GroupBegin(ID.DIALOG_SECONDARY_GROUP, c4d.BFH_CENTER, 1, 1, "Preview", 0, 0, 10)
         self.GroupEnd()
-
-        self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 3, 1, "Dropbox", 0, 10, 10)
+        self.GroupEnd()
+        
+        self.GroupBegin(ID.DIALOG_GROUP2_DOPBOXES, c4d.BFH_SCALEFIT, 2, 1, "Dropbox", 0, 10, 10)
         self.GroupBorderSpace(8, 2, 36, 2)
         self.AddStaticText(ID.DIALOG_TEXT2_DROPBOX, c4d.BFH_SCALEFIT, 0, 0, "Select map", 0)
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN3, c4d.BFH_CENTER, initw=250, inith=0)
@@ -588,8 +621,11 @@ class ReawoteSorterDialog(gui.GeDialog):
         customgui.SetBool(c4d.TREEVIEW_CURSORKEYS, True)
         customgui.SetBool(c4d.TREEVIEW_NOENTERRENAME, False)
 
+        self.GroupBegin(ID.DIALOG_GROUP4_BUTTONS, c4d.BFH_SCALEFIT, 1, 1, "Main Buttons", 0, 10, 10)
+        self.GroupBorderSpace(8, 2, 0, 2)
         self.AddButton(ID.DIALOG_ADD_TO_LIST_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Add to list")
         self.AddButton(ID.FILTER_MATERIALS_BUTTON, c4d.BFH_SCALEFIT, 1, 1, "Filter materials")
+        self.GroupEnd()
 
         # self.GroupBegin(ID.DIALOG_CB_GROUP, c4d.BFH_SCALEFIT, 1, 4, "Checkboxes", 0, 10, 10)
         # self.GroupBorderSpace(8, 2, 0, 2)
@@ -600,6 +636,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         # self.GroupEnd()
         
         self.GroupBegin(ID.DIALOG_GROUP_MINI_BUTTONS, c4d.BFH_SCALEFIT, 3, 1, "Mini Buttons", 0, 10, 10)
+        self.GroupBorderSpace(8, 2, 0, 2)
         self.AddButton(ID.DIALOG_SELECT_ALL_BUTTON, c4d.BFH_LEFT, 70, 5, "Select All")
         self.AddButton(ID.DIALOG_DELETE_BUTTON, c4d.BFH_LEFT, 50, 5, "Delete")
         self.AddButton(ID.DIALOG_ADD_TO_QUEUE_BUTTON, c4d.BFH_LEFT, 110, 5, "Add To Queue")
@@ -818,6 +855,10 @@ class ReawoteSorterDialog(gui.GeDialog):
             index = file_id_list.index(next)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
+            index = child_id_list.index(actual)
+            file_path = folder_path_list[index]
+            self.set_preview_material(file_path)
+
 
     # gets the previous item in the dropbox
     def get_previous_item(self, dropbox_id: int, file_list: list, file_name_list: list):
@@ -828,6 +869,22 @@ class ReawoteSorterDialog(gui.GeDialog):
             index = file_list.index(previous)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
+            index = child_id_list.index(actual)
+            file_path = folder_path_list[index]
+            self.set_preview_material(file_path)
+
+    def set_preview_material(self, path):
+        self.MaterialPreviewBmpTmp.InitWith(path)
+        self.MaterialPreviewBmpTmp.InitWith(path)
+        # Scale down the bitmap to 41x41
+        if (self.MaterialPreviewBmpTmp.GetBw()-1 > 41 and self.MaterialPreviewBmpTmp.GetBh()-1 > 41):
+            self.MaterialPreviewBmpTmp.ScaleBicubic(self.MaterialPreviewBmp,
+             0, 0, self.MaterialPreviewBmpTmp.GetBw()-1, self.MaterialPreviewBmpTmp.GetBh()-1,
+             0, 0, 41, 41)
+        else:
+            self.MaterialPreviewBmpTmp.ScaleIt(self.MaterialPreviewBmp, 256, True, False)
+        self._area.setBitmap(self.MaterialPreviewBmp)
+        self._area.Redraw()
 
     def Command(self, id, msg,):
         count = 1
@@ -854,7 +911,9 @@ class ReawoteSorterDialog(gui.GeDialog):
                 folder_path = os.path.join(path, file)
                 # saves the first file as first_file
                 while num <= 0:
+                    print(f"Tohle je folder_path: {folder_path}")
                     first_file = file
+                    self.set_preview_material(folder_path)
                     num += 1
                 ID_CHILD += 1
                 # adds the file to the dropbox
@@ -864,57 +923,11 @@ class ReawoteSorterDialog(gui.GeDialog):
                 checkbox_list.append(file)
                 folder_path_list.append(folder_path)
                 self._treegui.Refresh()
-
-                # for targetFolderName in targetFolders:
-                #     if targetFolderName in subdirs:
-                #         targetFolder = os.path.join(folder_path, targetFolderName)
-                #         dirPath = os.listdir(targetFolder)
-                #         hasColor = False
-                #         for file1 in dirPath:
-                #                 try: 
-                #                     parts = file1.split(".")[0].split("_")
-                #                     manufacturer = parts[0]
-                #                     productNumber = parts[1]
-                #                     product = parts[2]
-                #                     mapID = parts[3]
-                #                     resolution = parts[4]
-                #                     if mapID == "DIFF" or mapID == "COLOR" or mapID == "COL":
-                #                         hasColor = True
-                #                     if mapID == "DISP16":
-                #                         self.has16bDisp = True
-                #                         self.hasDisp = True
-                #                     if mapID == "DISP":
-                #                         self.hasDisp = True
-                #                     if mapID == "AO":
-                #                         self.hasAO = True
-                #                     if mapID == "IOR":
-                #                         self.hasIor = True
-                #                     if mapID == "NRM16":
-                #                         self.has16bNormal = True
-                #                 except:
-                #                     pass
-                #         if self.hasAO:
-                #             self.SetBool(ID.DIALOG_MAP_AO_CB, True)
-                #             self.Enable(ID.DIALOG_MAP_AO_CB, True)
-                #         if self.hasDisp:
-                #             self.SetBool(ID.DIALOG_MAP_DISPL_CB, True)
-                #             self.Enable(ID.DIALOG_MAP_DISPL_CB, True)
-                #         if self.has16bDisp:
-                #             self.SetBool(ID.DIALOG_MAP_16B_DISPL_CB, True)
-                #             self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
-                #         if self.has16bNormal:
-                #             self.SetBool(ID.DIALOG_MAP_16B_NORMAL_CB, True)
-                #             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
-                #         if self.hasIor:
-                #             self.SetBool(ID.DIALOG_MAP_IOR_CB, False)
-                #             self.Enable(ID.DIALOG_MAP_IOR_CB, True)
-                #         if hasColor:
-                #             self.materialFolder = path
-                #             self.Enable(ID.DIALOG_LOAD_BUTTON, True)
-                #             self.SetError("")
-                #         else:
-                #             self.SetError("One or more folders do not contain the correct Reawote material.")
-                #             print(folder, " neobsahuje spravnou slozku")
+            
+            print(f"Tohle je child_id_list: {child_id_list}")
+            print(f"Tohle je child_name_list: {child_name_list}")
+            print(f"Tohle je checkbox_list: {checkbox_list}")
+            print(f"Tohle je folder_path_list: {folder_path_list}")
 
             self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
             self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
@@ -941,11 +954,6 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
             
             id_mat = 4000
-            # sets the limit for number of materials to the dropbox
-            # if len(dir) < 40:
-            #     lim = len(dir)
-            # else:
-            #     lim = 40
             while 20 >= count:
                 material_name = "Material " + str(count)
                 self.AddChild(ID.DIALOG_DROPBOX_MAIN2, id_mat, material_name)
@@ -1009,6 +1017,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         # file go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_id_list, child_name_list)
+            file_path = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            self.set_preview_material(file_path)
         
         # file go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
