@@ -855,9 +855,12 @@ class ReawoteSorterDialog(gui.GeDialog):
             index = file_id_list.index(next)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
-            index = child_id_list.index(actual)
+            index = child_id_list.index(actual) + 1
             file_path = folder_path_list[index]
             self.set_preview_material(file_path)
+            print(f"Material preview: {file_path}")
+            ma_byt = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            print(f"Tohle tam ma byt: {ma_byt}")
 
 
     # gets the previous item in the dropbox
@@ -869,9 +872,12 @@ class ReawoteSorterDialog(gui.GeDialog):
             index = file_list.index(previous)
             actual_name = file_name_list[index]
             self.auto_assign(actual_name)
-            index = child_id_list.index(actual)
+            index = child_id_list.index(actual) - 1
             file_path = folder_path_list[index]
             self.set_preview_material(file_path)
+            print(f"Material preview: {file_path}")
+            ma_byt = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            print(f"Tohle tam ma byt: {ma_byt}")
 
     def set_preview_material(self, path):
         self.MaterialPreviewBmpTmp.InitWith(path)
