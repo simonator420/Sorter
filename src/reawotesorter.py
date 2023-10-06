@@ -649,8 +649,8 @@ class ReawoteSorterDialog(gui.GeDialog):
     
         self.GroupBegin(ID.DIALOG_SCROLL_GROUP, c4d.BFH_SCALEFIT, 2, 1, "Material folder", 0, 10, 10)
         self.GroupEnd()
-        self.GroupEnd(ID.DIALOG_MAIN_GROUP)
-        self.GroupEnd(ID.DIALOG_SCROLL_GROUP)
+        self.GroupEnd()
+        self.GroupEnd()
         self.Reset()
 
         self.SetTimer(1000)
@@ -717,53 +717,53 @@ class ReawoteSorterDialog(gui.GeDialog):
         root = self._treegui.SetRoot(self._treegui, self._listView, None)
 
         # deletes all items in treeview and lists if not empty
-        while len(self._listView.listOfTexture) != 0:
+        if len(self._listView.listOfTexture) != 0:
             self._listView.listOfTexture.clear()
         self._treegui.Refresh()
 
-        while len(checkbox_list) != 0:
+        if len(checkbox_list) != 0:
             checkbox_list.clear()
         
-        while len(material_to_add) != 0:
+        if len(material_to_add) != 0:
             material_to_add.clear()
 
-        while len(same_path_dirs) != 0:
+        if len(same_path_dirs) != 0:
             same_path_dirs.clear()
 
-        while len(materialCount) != 0:
+        if len(materialCount) != 0:
             materialCount.clear()
 
-        while len(child_id_list) != 0:
+        if len(child_id_list) != 0:
             child_id_list.clear()
         
-        while len(child_name_list) != 0:
+        if len(child_name_list) != 0:
             child_name_list.clear()
 
-        while len(map_id_list) != 0:
+        if len(map_id_list) != 0:
             map_id_list.clear()
 
-        while len(material_id_list) != 0:
+        if len(material_id_list) != 0:
             material_id_list.clear()
 
-        while len(material_name_list) != 0:
+        if len(material_name_list) != 0:
             material_name_list.clear()
         
-        while len(selected_materials) != 0:
+        if len(selected_materials) != 0:
             selected_materials.clear()
 
-        while len(selected_files) != 0:
+        if len(selected_files) != 0:
             selected_files.clear()
         
-        while len(selected_paths) != 0:
+        if len(selected_paths) != 0:
             selected_paths.clear()
 
-        while len(selected_maps) != 0:
+        if len(selected_maps) != 0:
             selected_maps.clear()
         
-        while len(tex_list) != 0:
+        if len(tex_list) != 0:
             tex_list.clear()
 
-        while len(folder_path_list) != 0:
+        if len(folder_path_list) != 0:
             folder_path_list.clear()
 
         return True
@@ -790,7 +790,6 @@ class ReawoteSorterDialog(gui.GeDialog):
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
             elif "normal" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4501)
-            # DISP taktez prezdivana HEIGHT
             elif "DISP" in actual_name:
                 self.SetInt32(ID.DIALOG_DROPBOX_MAIN3, 4502)
             elif "Displacement" in actual_name:
@@ -873,6 +872,7 @@ class ReawoteSorterDialog(gui.GeDialog):
             file_path = folder_path_list[index]
             self.set_preview_material(file_path)
 
+    # sets the image to preview window
     def set_preview_material(self, path):
         self.MaterialPreviewBmpTmp.InitWith(path)
         if (self.MaterialPreviewBmpTmp.GetBw()-1 > 41 and self.MaterialPreviewBmpTmp.GetBh()-1 > 41):
@@ -884,7 +884,7 @@ class ReawoteSorterDialog(gui.GeDialog):
         self._area.setBitmap(self.MaterialPreviewBmp)
         self._area.Redraw()
 
-    def Command(self, id, msg,):
+    def Command(self, id, msg):
         count = 1
         # browse button
         if id == ID.DIALOG_FOLDER_BUTTON:
@@ -922,10 +922,10 @@ class ReawoteSorterDialog(gui.GeDialog):
                 folder_path_list.append(folder_path)
                 self._treegui.Refresh()
             
-            print(f"Tohle je child_id_list: {child_id_list}")
-            print(f"Tohle je child_name_list: {child_name_list}")
-            print(f"Tohle je checkbox_list: {checkbox_list}")
-            print(f"Tohle je folder_path_list: {folder_path_list}")
+            print(f"child_id_list: {child_id_list}")
+            print(f"child_name_list: {child_name_list}")
+            print(f"checkbox_list: {checkbox_list}")
+            print(f"folder_path_list: {folder_path_list}")
 
             self.Enable(ID.FILTER_MATERIALS_BUTTON, True)
             self.Enable(ID.DIALOG_SELECT_ALL_BUTTON, True)
@@ -1015,8 +1015,8 @@ class ReawoteSorterDialog(gui.GeDialog):
         # file go back button <
         if id == ID.DIALOG_DROPBOX_BUTTON1:
             self.get_previous_item(ID.DIALOG_DROPBOX_MAIN, child_id_list, child_name_list)
-            file_path = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
-            self.set_preview_material(file_path)
+            # file_path = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            # self.set_preview_material(file_path)
         
         # file go forward button >
         if id == ID.DIALOG_DROPBOX_BUTTON2:
@@ -1029,6 +1029,16 @@ class ReawoteSorterDialog(gui.GeDialog):
         # material go forward button >
         if id == ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON:
             self.get_previous_item(ID.DIALOG_DROPBOX_MAIN2, material_id_list, material_name_list)
+
+        if id == ID.DIALOG_DROPBOX_MAIN:
+            print("kliknuto na checkbox")
+            actual = self.GetLong(ID.DIALOG_DROPBOX_MAIN)
+            index = child_id_list.index(actual)
+            actual_name = child_name_list[index]
+            index = child_id_list.index(actual)
+            file_path = folder_path_list[index]
+            self.set_preview_material(file_path)
+            self.auto_assign(actual_name)
 
         
         if id == ID.DIALOG_ADD_TO_LIST_BUTTON:
@@ -1065,9 +1075,9 @@ class ReawoteSorterDialog(gui.GeDialog):
         # filtering and uploading materials
         if id == ID.FILTER_MATERIALS_BUTTON:
             print("")
-            print(f"Tohle jsou selected_maps: {selected_maps}")
-            print(f"Tohle jsou selected_materials: {selected_materials}")
-            print(f"Tohle jsou selected_files: {selected_files}")                        
+            print(f"selected_maps: {selected_maps}")
+            print(f"selected_materials: {selected_materials}")
+            print(f"selected_files: {selected_files}")                        
             print("")
             assigned_material = ""
             materials_to_upload = []
@@ -1083,7 +1093,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     if assigned_material not in materials_to_upload:
                         # then add it into the list
                         materials_to_upload.append(assigned_material)
-                        print(f"{assigned_material} byl pridan do materials_to_upload")
+                        print(f"{assigned_material} was added to materials_to_upload")
             
             # goes through materials that were selected in the dropbox e.g. Material 2, Material 5, ...
             for assigned_material in materials_to_upload:
