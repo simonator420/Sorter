@@ -3,6 +3,7 @@ import sys
 
 import c4d
 from c4d import plugins, gui, storage, documents
+import maxon
 
 REAWOTE_SORTER_ID=1060870
 
@@ -104,6 +105,11 @@ class ID():
     DIALOG_DELETE_BUTTON = 100033
 
     DIALOG_CB_GROUP = 100034
+
+    DIALOG_GROUP_RENDERER = 100037
+    DIALOG_RENDERER_TEXT = 100038
+    DIALOG_SETTINGS_BUTTON = 100039
+    DIALOG_RENDERER_COMBOBOX = 100040
 
     ID_CHILD = 9000
 
@@ -608,6 +614,29 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.AddButton(ID.DIAlOG_PREVIOUS_MATERIAL_BUTTON, c4d.BFH_CENTER, 1, 1, "<")
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN2, c4d.BFH_CENTER, initw=250, inith=0)
         self.AddButton(ID.DIALOG_NEXT_MATERIAL_BUTTON, c4d.BFH_CENTER, 1, 1, ">")
+        self.GroupEnd()
+
+        self.GroupBegin(ID.DIALOG_GROUP_RENDERER,  c4d.BFH_SCALEFIT, 3, 1, "Renderer", 0, 10, 10)
+        self.GroupBorderSpace(8, 2, 36, 2)
+        self.AddStaticText(ID.DIALOG_RENDERER_TEXT, c4d.BFH_SCALEFIT, 0, 0, "Select renderer", 0)
+        header = c4d.BaseContainer()
+        header.SetInt32(c4d.BITMAPBUTTON_IGNORE_BITMAP_WIDTH, False)
+        header.SetInt32(c4d.BITMAPBUTTON_IGNORE_BITMAP_HEIGHT, True)
+        header.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
+        header.SetBool(c4d.BITMAPBUTTON_TOGGLE, False)
+        header.SetString(c4d.BITMAPBUTTON_TOOLTIP, "settings")
+        if c4d.GetC4DVersion() // 1000 >= 21:
+            idIconPrefs = 1026694
+        else:
+            idIconPrefs = 1026693
+        header.SetInt32(c4d.BITMAPBUTTON_ICONID1, idIconPrefs)
+        self.AddCustomGui(ID.DIALOG_SETTINGS_BUTTON, c4d.CUSTOMGUI_BITMAPBUTTON, "", c4d.BFH_LEFT, 32, 16, header)
+        renderers = self.AddComboBox(ID.DIALOG_RENDERER_COMBOBOX, c4d.BFH_RIGHT, inith=10, initw=250)
+        physical = self.AddChild(renderers, 6400, "Physical")
+        corona = self.AddChild(renderers, 6401, "Corona")
+        vray = self.AddChild(renderers, 6402, "V-ray")
+        redshift = self.AddChild(renderers, 6403, "Redshift")
+        octane = self.AddChild(renderers, 6404, "Octane")
         self.GroupEnd()
         
         customgui = c4d.BaseContainer()
@@ -1129,24 +1158,69 @@ class ReawoteSorterDialog(gui.GeDialog):
                 loadDispl = self.GetBool(ID.DIALOG_MAP_DISPL_CB)
                 load16bdispl = self.GetBool(ID.DIALOG_MAP_16B_DISPL_CB)
                 # loadIor = self.GetBool(ID.DIALOG_MAP_IOR_CB
-                mat = c4d.BaseMaterial(ID.CORONA_STR_MATERIAL_PHYSICAL)
-                mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
-                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
-                fusionShader = None
 
-                for index, mapID in enumerate(uploaded_maps):
-                    # gets the path of the actual file through its index
-                    fullPath = uploaded_paths[index]
+                # for index, mapID in enumerate(uploaded_maps):
+                #     # gets the path of the actual file through its index
+                #     fullPath = uploaded_paths[index]
                     # sets the name of the final material same as the material that is attached to the file e.g. Material 2
+                    
+
+                ##############
+                ### CORONA ###
+                ##############
+                    
+                if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6401:
+                    if not c4d.plugins.FindPlugin(1030480):
+                        c4d.gui.MessageDialog("Corona is not installed")
+                        return
+                    mat = c4d.BaseMaterial(ID.CORONA_STR_MATERIAL_PHYSICAL)
+                    mat.SetParameter(ID.CORONA_MATERIAL_PREVIEWSIZE, ID.CORONA_MATERIAL_PREVIEWSIZE_1024, c4d.DESCFLAGS_SET_NONE)
+                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_IOR_VALUE, 1.56, c4d.DESCFLAGS_SET_NONE)
                     mat.SetName(assigned_material)
-                    if mapID == "COL":
-                        if "AO" not in uploaded_maps:
+                    fusionShader = None
+                    for index, mapID in enumerate(uploaded_maps):
+                        # gets the path of the actual file through its index
+                        fullPath = uploaded_paths[index]
+                        if mapID == "COL":
+                            if "AO" not in uploaded_maps:
+                                bitmap = c4d.BaseShader(c4d.Xbitmap)
+                                bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                                mat.InsertShader(bitmap)
+                                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            # else:
+                            else: 
+                                if not fusionShader:
+                                    fusionShader = c4d.BaseShader(c4d.Xfusion)
+                                    fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+                                    fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+                                    mat.InsertShader(fusionShader)
+                                    mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
+                                bitmap = c4d.BaseShader(c4d.Xbitmap)
+                                bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                                fusionShader.InsertShader(bitmap)
+                                fusionShader.SetParameter(c4d.SLA_FUSION_BASE_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "NRM":
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            texture = c4d.BaseShader(ID.PLUGINID_CORONA4D_NORMALSHADER)
+                            texture.SetParameter(ID.CORONA_NORMALMAP_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            texture.SetParameter(ID.CORONA_NORMALMAP_FLIP_G, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.InsertShader(texture)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, texture, c4d.DESCFLAGS_SET_NONE)
+                        # elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
+                        elif mapID == "DISP":
                             bitmap = c4d.BaseShader(c4d.Xbitmap)
                             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                             mat.InsertShader(bitmap)
-                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        # else:
-                        else: 
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MIN_LEVEL, 0, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
+                        # elif loadAO and mapID == "AO":
+                        elif mapID == "AO":
                             if not fusionShader:
                                 fusionShader = c4d.BaseShader(c4d.Xfusion)
                                 fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
@@ -1156,97 +1230,65 @@ class ReawoteSorterDialog(gui.GeDialog):
                             bitmap = c4d.BaseShader(c4d.Xbitmap)
                             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                             fusionShader.InsertShader(bitmap)
-                            fusionShader.SetParameter(c4d.SLA_FUSION_BASE_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "NRM":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        texture = c4d.BaseShader(ID.PLUGINID_CORONA4D_NORMALSHADER)
-                        texture.SetParameter(ID.CORONA_NORMALMAP_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        texture.SetParameter(ID.CORONA_NORMALMAP_FLIP_G, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.InsertShader(texture)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, texture, c4d.DESCFLAGS_SET_NONE)
-                    # elif loadDispl and (load16bdispl and mapID == "DISP16") or (not load16bdispl and mapID == "DISP"):
-                    elif mapID == "DISP":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MIN_LEVEL, 0, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_DISPLACEMENT_MAX_LEVEL, 1, c4d.DESCFLAGS_SET_NONE)
-                    # elif loadAO and mapID == "AO":
-                    elif mapID == "AO":
-                        if not fusionShader:
-                            fusionShader = c4d.BaseShader(c4d.Xfusion)
-                            fusionShader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
-                            fusionShader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
-                            mat.InsertShader(fusionShader)
-                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_COLOR_TEXTURE, fusionShader, c4d.DESCFLAGS_SET_NONE)
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        fusionShader.InsertShader(bitmap)
-                        fusionShader.SetParameter(c4d.SLA_FUSION_BLEND_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "OPAC":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "GLOSS":
-                        print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "ROUGH":
-                        print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_ROUGHNESS, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "REFL":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_MATERIAL_REFLECT, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_REFLECT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "SSS":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_SSS, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_VOLUME_SSS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "SSSABSORB":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_MATERIAL_VOLUME, True, c4d.DESCFLAGS_SET_NONE)
-                        mat.SetParameter(ID.CORONA_VOLUME_ABSORPTION_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    # elif loadIor and mapID == "IOR":
-                    #     bitmap = c4d.BaseShader(c4d.Xbitmap)
-                    #     bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                    #     mat.InsertShader(bitmap)
-                    #     mat.SetParameter(ID.CORONA_REFLECT_FRESNELLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "METAL":
-                        bitmap = c4d.BaseShader(c4d.Xbitmap)
-                        bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
-                        mat.InsertShader(bitmap)
-                        mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
-                    elif mapID == "BUMP":
-                        if "NRM" not in uploaded_maps:
+                            fusionShader.SetParameter(c4d.SLA_FUSION_BLEND_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "OPAC":
                             bitmap = c4d.BaseShader(c4d.Xbitmap)
                             bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
                             mat.InsertShader(bitmap)
-                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
-                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
-                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ALPHA_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "GLOSS":
+                            print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_GLOSSINESS, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "ROUGH":
+                            print(f"Tohle nechapu mam byt Roughness, ale jsem {mapID} a tohle je moje fullPath {fullPath}")
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_ROUGHNESS_VALUE, 100.0, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE, ID.CORONA_PHYSICAL_MATERIAL_ROUGHNESS_MODE_ROUGHNESS, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "REFL":
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_MATERIAL_REFLECT, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_REFLECT_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "SSS":
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_SSS, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_VOLUME_SSS_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "SSSABSORB":
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_MATERIAL_VOLUME, True, c4d.DESCFLAGS_SET_NONE)
+                            mat.SetParameter(ID.CORONA_VOLUME_ABSORPTION_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        # elif loadIor and mapID == "IOR":
+                        #     bitmap = c4d.BaseShader(c4d.Xbitmap)
+                        #     bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                        #     mat.InsertShader(bitmap)
+                        #     mat.SetParameter(ID.CORONA_REFLECT_FRESNELLOR_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "METAL":
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            mat.InsertShader(bitmap)
+                            mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_METALLIC_MODE_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "BUMP":
+                            if "NRM" not in uploaded_maps:
+                                bitmap = c4d.BaseShader(c4d.Xbitmap)
+                                bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                                mat.InsertShader(bitmap)
+                                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_ENABLE, True, c4d.DESCFLAGS_SET_NONE)
+                                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_VALUE, 1.0, c4d.DESCFLAGS_SET_NONE)
+                                mat.SetParameter(ID.CORONA_PHYSICAL_MATERIAL_BASE_BUMPMAPPING_TEXTURE, bitmap, c4d.DESCFLAGS_SET_NONE)
                     doc = c4d.documents.GetActiveDocument()
                     doc.StartUndo()
                     doc.InsertMaterial(mat)
@@ -1254,6 +1296,300 @@ class ReawoteSorterDialog(gui.GeDialog):
                     doc.EndUndo()
                     material_to_add.append(mat)                                   
                     self.SetString(ID.DIALOG_ERROR, "")
+
+                ################
+                ### Physical ###
+                ################
+                
+                if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6400:
+                    mat = c4d.BaseMaterial(c4d.Mmaterial)
+                    mat[c4d.MATERIAL_PREVIEWSIZE] = 10
+                    bitmap = c4d.BaseShader(c4d.Xbitmap)
+                    fusion_shader = None
+                    mat.SetName(assigned_material)
+                    for index, mapID in enumerate(uploaded_maps):
+                        # gets the path of the actual file through its index
+                        fullPath = uploaded_paths[index]
+                        if mapID == "COL" or mapID == "COLOR":
+                            if "AO" not in uploaded_maps:
+                                bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                                mat.InsertShader(bitmap)
+                                mat[c4d.MATERIAL_COLOR_SHADER] = bitmap
+                            else:
+                                if not fusion_shader:
+                                    fusion_shader = c4d.BaseShader(c4d.Xfusion)
+                                    fusion_shader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+                                    fusion_shader.SetParameter(c4d.SLA_FUSION_BLEND, 1.0, c4d.DESCFLAGS_SET_NONE)
+                                    mat.InsertShader(fusion_shader)
+                                    mat[c4d.MATERIAL_COLOR_SHADER] = fusion_shader
+                                bitmap = c4d.BaseShader(c4d.Xbitmap)
+                                bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                                fusion_shader.InsertShader(bitmap)
+                                fusion_shader.SetParameter(c4d.SLA_FUSION_BASE_CHANNEL, bitmap, c4d.DESCFLAGS_SET_NONE)
+                        elif mapID == "AO":
+                            if not fusion_shader:
+                                fusion_shader = c4d.BaseShader(c4d.Xfusion)
+                                fusion_shader.SetParameter(c4d.SLA_FUSION_MODE, c4d.SLA_FUSION_MODE_MULTIPLY, c4d.DESCFLAGS_SET_NONE)
+                                fusion_shader[c4d.SLA_FUSION_BLEND] = 1.0
+                                mat.InsertShader(fusion_shader)
+                                mat[c4d.MATERIAL_COLOR_SHADER] = fusion_shader
+                            bitmap = c4d.BaseShader(c4d.Xbitmap)
+                            bitmap.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            fusion_shader.InsertShader(bitmap)
+                            fusion_shader[c4d.SLA_FUSION_BLEND_CHANNEL] = bitmap
+                        elif mapID == "NRM":
+                            normal_shader = c4d.BaseShader(c4d.Xbitmap)
+                            mat[c4d.MATERIAL_USE_NORMAL] = True
+                            normal_shader[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat[c4d.MATERIAL_NORMAL_SHADER] = normal_shader
+                            normal_shader[c4d.BITMAPSHADER_COLORPROFILE] = 1
+                            mat.InsertShader(normal_shader)
+                        elif mapID == "BUMP":
+                            bump_shader = c4d.BaseShader(c4d.Xbitmap)
+                            bump_shader[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat[c4d.MATERIAL_BUMP_SHADER] = bump_shader
+                            mat.InsertShader(bump_shader)
+                            mat[c4d.MATERIAL_USE_BUMP] = True
+                        elif mapID == "ROUGH":
+                            rough_shader = c4d.BaseShader(c4d.Xbitmap)
+                            rough_shader.SetParameter(c4d.BITMAPSHADER_FILENAME, fullPath, c4d.DESCFLAGS_SET_NONE)
+                            rough_shader[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat.InsertShader(rough_shader)
+                            bases = [c4d.REFLECTION_LAYER_LAYER_DATA + c4d.REFLECTION_LAYER_LAYER_SIZE * 4]
+                            for base in bases:
+                                mat[base + c4d.REFLECTION_LAYER_MAIN_DISTRIBUTION] = 3
+                                mat[base + c4d.REFLECTION_LAYER_MAIN_VALUE_ROUGHNESS] = 100
+                                mat[base + c4d.REFLECTION_LAYER_MAIN_SHADER_ROUGHNESS] = rough_shader
+                        elif mapID == "DISP":
+                            disp_shader = c4d.BaseShader(c4d.Xbitmap)
+                            disp_shader[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat[c4d.MATERIAL_DISPLACEMENT_SHADER] = disp_shader
+                            disp_shader[c4d.BITMAPSHADER_COLORPROFILE] = 1
+                            mat.InsertShader(disp_shader)
+                            mat[c4d.MATERIAL_USE_DISPLACEMENT] = True
+                        elif mapID == "OPAC":
+                            opac_shader = c4d.BaseShader(c4d.Xbitmap)
+                            opac_shader[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat[c4d.MATERIAL_ALPHA_SHADER] = opac_shader
+                            mat.InsertShader(opac_shader)
+                            mat[c4d.MATERIAL_USE_ALPHA] = True
+                    doc = c4d.documents.GetActiveDocument()
+                    doc.StartUndo()
+                    doc.InsertMaterial(mat)
+                    doc.AddUndo(c4d.UNDOTYPE_NEW, mat)
+                    doc.EndUndo()
+                    material_to_add.append(mat)                                   
+                    self.SetString(ID.DIALOG_ERROR, "")
+
+            ################
+            ### Redshift ###
+            ################
+
+            if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6403:
+
+                if not c4d.plugins.FindPlugin(1036219):
+                    c4d.gui.MessageDialog("Redshift is not installed")
+                    return
+                
+                color_layer_node = None
+                color_layer_added = False
+                doc = c4d.documents.GetActiveDocument()
+                render_data = doc.GetActiveRenderData()
+                render_data[c4d.RDATA_RENDERENGINE] = 1036219
+                c4d.EventAdd()
+
+                rs_node_space_id: maxon.Id = maxon.Id("com.redshift3d.redshift4c4d.class.nodespace")
+                output_node_id: maxon.Id = maxon.Id(("com.redshift3d.redshift4c4d.nodes.core.standardmaterial"))
+                displacement_node_id: maxon.Id = maxon.Id("com.redshift3d.redshift4c4d.nodes.core.displacement")
+
+                displacement_tex_map_input_port_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.displacement.texmap"
+                displacement_out_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.displacement.out"
+
+                color_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.base_color"
+                roughness_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.refl_roughness"
+                metalness_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.metalness"
+                opacity_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.opacity_color"
+                subsurface_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.ms_color"
+                sheen_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.sheen_color"
+                sheengloss_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.sheen_roughness"
+                bumpmap_input_port_in_output_node_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.standardmaterial.bump_input"
+                                
+
+                texture_node_id: maxon.Id = maxon.Id("com.redshift3d.redshift4c4d.nodes.core.texturesampler")
+                texture_node_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.texturesampler.tex0"
+                texture_nodepath_port_id: maxon.String = "path"
+                texture_nodepath_colorspace_id: maxon.String = "colorspace"
+                texture_color_out_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.texturesampler.outcolor"
+
+
+                bump_node_id: maxon.Id = maxon.Id("com.redshift3d.redshift4c4d.nodes.core.bumpmap")
+                bump_in_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.bumpmap.input"
+                bump_out_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.bumpmap.out"
+                bump_type_in_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.bumpmap.inputtype"
+
+                color_layer_node_id: maxon.Id = maxon.Id("com.redshift3d.redshift4c4d.nodes.core.rscolorlayer")
+                color_layer_color_in_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.rscolorlayer.base_color"
+                colorlayer_layer_one_in_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.rscolorlayer.layer1_color"
+                colorlayer_layer_one_blend_mode_in_port_id : maxon.String = "com.redshift3d.redshift4c4d.nodes.core.rscolorlayer.layer1_blend_mode"
+                color_layer_color_out_port_id: maxon.String = "com.redshift3d.redshift4c4d.nodes.core.rscolorlayer.outcolor"
+
+                mat: c4d.BaseMaterial = c4d.BaseMaterial(c4d.Mmaterial)
+                # parts = file.split(".")[0].split("_")
+                mat.SetName(checkbox)
+                mat[c4d.MATERIAL_PREVIEWSIZE] = 10
+                if not mat:
+                    raise MemoryError(f"{mat = }")
+                node_material: c4d.node_material = mat.GetNodeMaterialReference()
+                graph: maxon.GraphModelRef = node_material.CreateDefaultGraph(rs_node_space_id)
+                
+                doc.InsertMaterial(mat)
+                result: list[maxon.GraphNode] = []
+                maxon.GraphModelHelper.FindNodesByAssetId(graph, output_node_id, True, result)
+                if len(result) < 1:
+                    raise RuntimeError("Could not find standard node in material.")
+                output_node: maxon.GraphNode = result[0]
+
+                for index, mapID in enumerate(uploaded_maps):
+                    # gets the path of the actual file through its index
+                    fullPath = uploaded_paths[index]
+
+                    with graph.BeginTransaction() as transaction:
+                                        
+                        if mapID == "COL" or mapID == "AO":
+                            if mapID == "COL" or "AO" not in uploaded_maps:
+                                texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                                                
+                                path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                                path_port.SetDefaultValue(maxon.Url(fullPath))
+
+                                texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                                color_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(color_input_port_in_output_node_id)
+                                texture_out_port.Connect(color_input_port_in_output_node)
+                                                
+                                transaction.Commit()
+                                            
+                        elif mapID == "COL":
+                            if color_layer_added == False:
+                                color_layer_node = graph.AddChild(maxon.Id(), color_layer_node_id)
+                                color_layer_out_port_node: maxon.GraphNode = color_layer_node.GetOutputs().FindChild(color_layer_color_out_port_id)
+                                color_layer_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(color_input_port_in_output_node_id)
+                                color_layer_out_port_node.Connect(color_layer_input_port_in_output_node)
+                                color_layer_added = True
+                                                
+                                texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                                path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                                path_port.SetDefaultValue(maxon.Url(fullPath))
+                                texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                                color_layer_color_in_port: maxon.GraphNode = color_layer_node.GetInputs().FindChild(color_layer_color_in_port_id)
+                                texture_out_port.Connect(color_layer_color_in_port)
+                                                
+                                transaction.Commit()
+                                            
+                        elif mapID == "AO":
+                            if color_layer_added == False:
+                                color_layer_node = graph.AddChild(maxon.Id(), color_layer_node_id)
+                                color_layer_out_port_node: maxon.GraphNode = color_layer_node.GetOutputs().FindChild(color_layer_color_out_port_id)
+                                color_layer_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(color_input_port_in_output_node_id)
+                                color_layer_out_port_node.Connect(color_layer_input_port_in_output_node)
+                                color_layer_added = True
+                                                
+                                texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                                path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                                path_port.SetDefaultValue(maxon.Url(fullPath))
+                                texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                                colorlayer_layer_one_in_port: maxon.GraphNode = color_layer_node.GetInputs().FindChild(colorlayer_layer_one_in_port_id)
+                                colorlayer_layer_one_blend_mode_in_port: maxon.GraphNode = color_layer_node.GetInputs().FindChild(colorlayer_layer_one_blend_mode_in_port_id)
+                                colorlayer_layer_one_blend_mode_in_port.SetDefaultValue(4)
+                                texture_out_port.Connect(colorlayer_layer_one_in_port)
+                                                
+                                transaction.Commit()
+                            else:
+                                continue
+                                        
+                        elif mapID == "ROUGH":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            roughness_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(roughness_input_port_in_output_node_id)
+                            texture_out_port.Connect(roughness_input_port_in_output_node)
+                            
+                            transaction.Commit()
+                                        
+                        elif mapID == "METAL":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            metalness_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(metalness_input_port_in_output_node_id)
+                            texture_out_port.Connect(metalness_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+                                        
+                        elif mapID == "OPAC":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            opacity_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(opacity_input_port_in_output_node_id)
+                            texture_out_port.Connect(opacity_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+                                        
+                        elif mapID == "SSS":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            subsurface_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(subsurface_input_port_in_output_node_id)
+                            texture_out_port.Connect(subsurface_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+                                        
+                        elif mapID == "SHEEN":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            sheen_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(sheen_input_port_in_output_node_id)
+                            texture_out_port.Connect(sheen_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+                                        
+                        elif mapID == "SHEENGLOSS":
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            sheengloss_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(sheengloss_input_port_in_output_node_id)
+                            texture_out_port.Connect(sheengloss_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+
+                        elif mapID == "NRM":
+                            bump_node = graph.AddChild(maxon.Id(), bump_node_id)
+                            bump_out_port_node: maxon.GraphNode = bump_node.GetOutputs().FindChild(bump_out_port_id)
+                            bumpmap_input_port_in_output_node : maxon.GraphNode = output_node.GetInputs().FindChild(bumpmap_input_port_in_output_node_id)
+                            bump_out_port_node.Connect(bumpmap_input_port_in_output_node)
+                                            
+                            texture_node = graph.AddChild(maxon.Id(), texture_node_id)
+                            path_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_port_id)
+                            path_port.SetDefaultValue(maxon.Url(fullPath))
+                            colorspace_port = texture_node.GetInputs().FindChild(texture_node_port_id).FindChild(texture_nodepath_colorspace_id)
+                            colorspace_port.SetDefaultValue("RS_INPUT_COLORSPACE_SRGB_LINEAR")
+                                            
+                            texture_out_port: maxon.GraphNode = texture_node.GetOutputs().FindChild(texture_color_out_port_id)
+                            bumpmap_input_port_in_output_node : maxon.GraphNode = bump_node.GetInputs().FindChild(bump_in_port_id)
+                            bumpmapTypeInputPortInoutput_node: maxon.GraphNode = bump_node.GetInputs().FindChild(bump_type_in_port_id)
+                            bumpmapTypeInputPortInoutput_node.SetDefaultValue(1)
+                            texture_out_port.Connect(bumpmap_input_port_in_output_node)
+                                            
+                            transaction.Commit()
+
+                    c4d.EventAdd()
+
+                doc.InsertMaterial(mat)
+                
             c4d.EventAdd()
             # emptying the lists for another material
             uploaded_indexes.clear()
