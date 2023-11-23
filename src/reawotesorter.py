@@ -381,6 +381,13 @@ class ID():
     CORONA_NORMALMAP_CUSTOM_UVW_OVERRIDE = 11341
     CORONA_NORMALMAP_CUSTOM_UVW_CHANNEL = 11342
 
+    OCTANE_MATERIAL = 1029501
+    OCTANE_BSDF_MODEL = 2585
+    OCTANE_BITMAP = 5833
+    OCTANE_TEXTURE = 1029508
+    OCTANE_MULTIPLY = 1029516
+    OCTANE_DISPLACEMENT = 1031901
+
 class MaterialPreview(c4d.gui.GeUserArea):
     def __init__(self, bmp):
       super(MaterialPreview, self).__init__()
@@ -1166,7 +1173,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                     
 
                 ##############
-                ### CORONA ###
+                ### Corona ###
                 ##############
                     
                 if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6401:
@@ -1380,6 +1387,213 @@ class ReawoteSorterDialog(gui.GeDialog):
                     doc.EndUndo()
                     material_to_add.append(mat)                                   
                     self.SetString(ID.DIALOG_ERROR, "")
+
+            ##############
+            ### Octane ###
+            ##############
+
+            if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6404:
+                if not c4d.plugins.FindPlugin(1029525):
+                    c4d.gui.MessageDialog("Octane is not installed")
+                    return
+                
+                mat = c4d.BaseMaterial(ID.OCTANE_MATERIAL)
+                mat[c4d.OCT_MATERIAL_TYPE] = 2516
+                mat[ID.OCTANE_BSDF_MODEL] = 2
+                mat[c4d.OCT_MATERIAL_PREVIEWSIZE] = 10
+                mat.SetName(assigned_material)
+
+                multiply_loaded = False
+                multiply = None
+
+                for index, mapID in enumerate(uploaded_maps):
+                    # gets the path of the actual file through its index
+                    fullPath = uploaded_paths[index]
+                    if mapID == "COL":
+                        if "AO" not in uploaded_maps:
+                            bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                            bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                            mat.InsertShader(bitmap)
+                            mat[c4d.OCT_MATERIAL_DIFFUSE_LINK] = bitmap
+                        else:
+                            bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                            if multiply_loaded == False:
+                                multiply = c4d.BaseShader(ID.OCTANE_MULTIPLY)
+                                mat.InsertShader(multiply)
+                                multiply_loaded = True
+                            multiply[c4d.MULTIPLY_TEXTURE1] = bitmap
+                            bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                            mat.InsertShader(bitmap)  
+                            mat[c4d.OCT_MATERIAL_DIFFUSE_LINK] = multiply
+                                        
+                    elif mapID == "AO":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        if multiply_loaded == False:
+                            multiply = c4d.BaseShader(ID.OCTANE_MULTIPLY)
+                            mat.InsertShader(multiply)
+                            multiply_loaded = True
+                        multiply[c4d.MULTIPLY_TEXTURE2] = bitmap
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MATERIAL_DIFFUSE_LINK] = multiply
+                                        
+                    elif mapID == "ROUGH":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        bitmap[c4d.IMAGETEXTURE_GAMMA] = 1.0
+                        bitmap[c4d.IMAGETEXTURE_MODE] = 1
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MATERIAL_ROUGHNESS_LINK] = bitmap
+
+                    elif mapID == "NRM":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MATERIAL_NORMAL_LINK] = bitmap
+                    
+                    elif mapID == "DISP":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        displacement = c4d.BaseShader(ID.OCTANE_DISPLACEMENT)
+                        displacement[c4d.DISPLACEMENT_AMOUNT] = 1.0
+                        displacement[c4d.DISPLACEMENT_LEVELOFDETAIL] = 10
+                        displacement[c4d.DISPLACEMENT_TEXTURE] = bitmap
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        bitmap[c4d.IMAGETEXTURE_GAMMA] = 1.0
+                        bitmap[c4d.IMAGETEXTURE_MODE] = 1
+                        mat.InsertShader(displacement)
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MATERIAL_DISPLACEMENT_LINK] = displacement
+                                        
+                    elif mapID == "OPAC":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        bitmap[c4d.IMAGETEXTURE_GAMMA] = 1.0
+                        bitmap[c4d.IMAGETEXTURE_MODE] = 1
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MATERIAL_OPACITY_LINK] = bitmap
+                                        
+                    elif mapID == "METAL":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        bitmap[c4d.IMAGETEXTURE_GAMMA] = 1.0
+                        bitmap[c4d.IMAGETEXTURE_MODE] = 1
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MAT_SPECULAR_MAP_LINK] = bitmap
+
+                    elif mapID == "SHEEN":
+                        bitmap = c4d.BaseShader(ID.OCTANE_TEXTURE)
+                        bitmap[c4d.IMAGETEXTURE_FILE] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.OCT_MAT_SHEEN_LINK] = bitmap
+                                    
+                doc = c4d.documents.GetActiveDocument()
+                doc.StartUndo()
+                doc.InsertMaterial(mat)   
+            
+            #############
+            ### V-ray ###
+            #############
+
+            if self.GetInt32(ID.DIALOG_RENDERER_COMBOBOX) == 6402:
+
+                if not c4d.plugins.FindPlugin(1053272):
+                    c4d.gui.MessageDialog("V-ray is not installed")
+                    return
+
+                mat = c4d.BaseMaterial(ID.VRAY_MATERIAL)
+                fusion_shader = None
+                mat[c4d.VRAY_SETTINGS_MATERIAL_PREVIEW_OVERRIDE] = True
+                mat[c4d.VRAY_SETTINGS_MATERIAL_PREVIEW_VIEWPORT_SIZE] = 10
+                mat.SetName(assigned_material)
+
+                for index, mapID in enumerate(uploaded_maps):
+                    fullPath = uploaded_paths[index]
+                    if mapID == "COL":
+                        if "AO" not in uploaded_maps:
+                            bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                            bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            mat.InsertShader(bitmap)
+                            mat[c4d.BRDFVRAYMTL_DIFFUSE_TEXTURE] = bitmap
+                        else:
+                            if not fusion_shader:
+                                fusion_shader = c4d.BaseShader(c4d.Xfusion)
+                                fusion_shader[c4d.SLA_FUSION_MODE] = c4d.SLA_FUSION_MODE_MULTIPLY
+                                mat.InsertShader(fusion_shader)
+                                mat[c4d.BRDFVRAYMTL_DIFFUSE_TEXTURE] = fusion_shader
+                            bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                            bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                            fusion_shader.InsertShader(bitmap)
+                            fusion_shader[c4d.SLA_FUSION_BASE_CHANNEL] = bitmap
+                                    
+                    elif mapID == "AO":
+                        if not fusion_shader:
+                            fusion_shader = c4d.BaseShader(c4d.Xfusion)
+                            fusion_shader[c4d.SLA_FUSION_MODE] = c4d.SLA_FUSION_MODE_MULTIPLY
+                            mat.InsertShader(fusion_shader)
+                            mat[c4d.BRDFVRAYMTL_DIFFUSE_TEXTURE] = fusion_shader
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        fusion_shader.InsertShader(bitmap)
+                        fusion_shader[c4d.SLA_FUSION_BLEND_CHANNEL] = bitmap
+
+                    elif mapID == "NRM":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        bitmap[c4d.BITMAPSHADER_COLORPROFILE] = 1
+                        mat.InsertShader(bitmap)
+                        texture = c4d.BaseShader(ID.VRAY_NORMAL_MAP)
+                        texture[c4d.TEXNORMALBUMP_BUMP_TEX_COLOR] = bitmap
+                        texture[c4d.TEXNORMALBUMP_MAP_TYPE] = 1
+                        mat.InsertShader(texture)
+                        mat[c4d.BRDFVRAYMTL_BUMP_MAP] = texture
+
+                    elif mapID == "GLOSS":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_REFLECT_GLOSSINESS_TEXTURE] = bitmap
+                        vec = c4d.Vector(255,255,255)
+                        mat[c4d.BRDFVRAYMTL_REFLECT_VALUE] = vec
+
+                    elif mapID == "METAL":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_METALNESS_TEXTURE] = bitmap
+
+                    elif mapID == "OPAC":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_OPACITY_COLOR_TEXTURE] = bitmap
+
+                    elif mapID == "SSS":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_TRANSLUCENCY_COLOR_TEXTURE] = bitmap
+                        mat[c4d.BRDFVRAYMTL_TRANSLUCENCY] = 6
+                                    
+                    elif mapID == "SHEEN":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_SHEEN_COLOR_TEXTURE] = bitmap
+
+                    elif mapID == "SHEENGLOSS":
+                        bitmap = c4d.BaseShader(ID.VRAY_BITMAP)
+                        bitmap[c4d.BITMAPSHADER_FILENAME] = fullPath
+                        mat.InsertShader(bitmap)
+                        mat[c4d.BRDFVRAYMTL_SHEEN_GLOSSINESS_TEXTURE] = bitmap
+
+                doc = c4d.documents.GetActiveDocument()
+                doc.StartUndo()
+                doc.InsertMaterial(mat)
+                doc.AddUndo(c4d.UNDOTYPE_NEW, mat)
+                doc.EndUndo()
+                material_to_add.append(mat)                                   
+                self.SetString(ID.DIALOG_ERROR, "")
+
 
             ################
             ### Redshift ###
