@@ -4,10 +4,10 @@ import sys
 import c4d
 from c4d import plugins, gui, storage, documents
 import maxon
-import reawotesettings as SettingsDialog
+import reawotesortersettings as SettingsDialog
 
 
-REAWOTE_SORTER_ID=1060870
+REAWOTE_PLUGIN_ID=1060870
 ROOT_DIR = os.path.split(__file__)[0]
 __res__ = None
 
@@ -962,7 +962,7 @@ class ReawoteSorterDialog(gui.GeDialog):
                 settings_dialog.Close()
             else:
                 settings_dialog.Open(dlgtype=c4d.DLG_TYPE_ASYNC,
-                                  pluginid=REAWOTE_SORTER_ID,
+                                  pluginid=REAWOTE_PLUGIN_ID,
                                   defaultw=360,
                                   defaulth=380,
                                   subid=1)    
@@ -1927,12 +1927,12 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -3, -3, 590, 800)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_PLUGIN_ID, -3, -3, 590, 800)
         return True
         
     def CoreMessage(self, id, msg):
         # Checks if texture baking has finished
-        if id==REAWOTE_SORTER_ID:
+        if id==REAWOTE_PLUGIN_ID:
             print("Command received!")
             print("Path is: " + self.thread.path)
             return True
