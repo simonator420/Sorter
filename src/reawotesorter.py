@@ -4,8 +4,13 @@ import sys
 import c4d
 from c4d import plugins, gui, storage, documents
 import maxon
+import reawotesettings as SettingsDialog
+
 
 REAWOTE_SORTER_ID=1060870
+ROOT_DIR = os.path.split(__file__)[0]
+__res__ = None
+
 
 dialog = None
 
@@ -110,6 +115,8 @@ class ID():
     DIALOG_RENDERER_TEXT = 100038
     DIALOG_SETTINGS_BUTTON = 100039
     DIALOG_RENDERER_COMBOBOX = 100040
+
+    DIALOG_PREVIEW_GROUP = 100041
 
     ID_CHILD = 9000
 
@@ -600,8 +607,10 @@ class ReawoteSorterDialog(gui.GeDialog):
 
         self.GroupBegin(ID.DIALOG_GROUP_DROPBOXES, c4d.BFH_SCALEFIT, 4, 1, "File Select", 0, 10, 10)
         self.GroupBorderSpace(8, 2, 0, 2)
-        self.AddUserArea(ID.MATERIAL_PREVIEW, c4d.BFH_CENTER, 42, 42)
-        self.AttachUserArea(self._area, ID.MATERIAL_PREVIEW)
+        if self.GroupBegin(ID.DIALOG_PREVIEW_GROUP, c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT, title="Material Preview"):
+            self.AddUserArea(ID.MATERIAL_PREVIEW, c4d.BFH_CENTER, 42, 42)
+            self.AttachUserArea(self._area, ID.MATERIAL_PREVIEW)
+            self.GroupEnd()
         self.AddButton(ID.DIALOG_DROPBOX_BUTTON1,c4d.BFH_LEFT, initw=10,inith=0, name="<")
         self.AddComboBox(ID.DIALOG_DROPBOX_MAIN,c4d.BFH_SCALEFIT, allowfiltering=True)
         self.AddButton(ID.DIALOG_DROPBOX_BUTTON2,c4d.BFH_RIGHT, initw=10,inith=0, name=">")
@@ -701,6 +710,24 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.hasDisp = False
         self.hasAO = False
         self.hasIor = False
+
+        if(os.name == "posix"):
+            text_file_path = os.path.join(ROOT_DIR, "renderer_posix.txt")
+        if(os.name == "nt"):
+            text_file_path = os.path.join(ROOT_DIR, "renderer_nt.txt")
+
+        f = open(text_file_path, "r")
+        renderer = f.read()
+        if renderer == "Physical":
+            self.SetInt32(ID.DIALOG_RENDERER_COMBOBOX, 6400)
+        if renderer == "Corona":
+            self.SetInt32(ID.DIALOG_RENDERER_COMBOBOX, 6401)
+        if renderer == "V-ray":
+            self.SetInt32(ID.DIALOG_RENDERER_COMBOBOX, 6402)
+        if renderer == "Redshift":
+            self.SetInt32(ID.DIALOG_RENDERER_COMBOBOX, 6403)
+        if renderer == "Octane":
+            self.SetInt32(ID.DIALOG_RENDERER_COMBOBOX, 6404)
         
         self.SetBool(ID.DIALOG_MAP_AO_CB, False)
         self.Enable(ID.DIALOG_MAP_AO_CB, False)
@@ -733,6 +760,11 @@ class ReawoteSorterDialog(gui.GeDialog):
         self.Enable(ID.DIALOG_ADD_TO_QUEUE_BUTTON, False)
         self.Enable(ID.DIALOG_DELETE_BUTTON, False)
         self.Enable(ID.DIALOG_ADD_TO_LIST_BUTTON, False)
+
+        self.Enable(ID.DIALOG_RENDERER_COMBOBOX, False)
+
+        self.HideElement(ID.DIALOG_PREVIEW_GROUP, True)
+        self.LayoutChanged(ID.DIALOG_GROUP_DROPBOXES)
 
         layout = c4d.BaseContainer()
         layout.SetLong(ID_CHECKBOX, c4d.LV_CHECKBOX)
@@ -921,6 +953,20 @@ class ReawoteSorterDialog(gui.GeDialog):
         self._area.Redraw()
 
     def Command(self, id, msg):
+        if id == ID.DIALOG_SETTINGS_BUTTON:
+            settings_dialog = SettingsDialog.get_dialog()
+            if settings_dialog is None:
+                SettingsDialog.__res__ = __res__
+                SettingsDialog.main()
+            elif settings_dialog.IsOpen():
+                settings_dialog.Close()
+            else:
+                settings_dialog.Open(dlgtype=c4d.DLG_TYPE_ASYNC,
+                                  pluginid=REAWOTE_SORTER_ID,
+                                  defaultw=360,
+                                  defaulth=380,
+                                  subid=1)    
+
         count = 1
         # browse button
         if id == ID.DIALOG_FOLDER_BUTTON:
@@ -986,6 +1032,11 @@ class ReawoteSorterDialog(gui.GeDialog):
             self.Enable(ID.DIALOG_MAP_DISPL_CB, True)
             self.Enable(ID.DIALOG_MAP_16B_DISPL_CB, True)
             self.Enable(ID.DIALOG_MAP_16B_NORMAL_CB, True)
+
+            self.Enable(ID.DIALOG_RENDERER_COMBOBOX, True)
+
+            self.HideElement(ID.DIALOG_PREVIEW_GROUP, False)
+            self.LayoutChanged(ID.DIALOG_GROUP_DROPBOXES)
             
             id_mat = 4000
             while 20 >= count:
@@ -1876,7 +1927,7 @@ class ReawoteSorter(plugins.CommandData):
             dialog = ReawoteSorterDialog()
 
     def Execute(self, doc):
-        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -3, -3, 550, 800)
+        dialog.Open(c4d.DLG_TYPE_ASYNC, REAWOTE_SORTER_ID, -3, -3, 590, 800)
         return True
         
     def CoreMessage(self, id, msg):
